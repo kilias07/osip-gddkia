@@ -1,3 +1,4 @@
+@import "./partials/_hambruger.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -33,6 +34,13 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    /*HAMBURGER MENU*/
+    --bar-height: 3px;
+    --hamburger-gap: 8px;
+
+    --animation-timing: 200ms ease-in-out;
+    --hamburger-height: calc(var(--bar-height) * 3 + var(--hamburger-gap) * 2);
   }
 
   .dark {
