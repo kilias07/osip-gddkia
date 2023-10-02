@@ -55,6 +55,9 @@ devDependencies:
   postcss:
     specifier: latest
     version: 8.4.31
+  postcss-import:
+    specifier: ^15.1.0
+    version: 15.1.0(postcss@8.4.31)
   tailwindcss:
     specifier: latest
     version: 3.3.3
