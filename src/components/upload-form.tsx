@@ -15,32 +15,13 @@ import {
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
-const formSchema = z.object({
-  file: z
-    .custom<FileList>()
-    .refine((file) => file && file.length > 0, {
-      message: "Plik jest wymagany",
-    })
-    .transform((file) => file.length > 0 && file.item(0)),
-  type: z.enum(["asc", "desc"], {
-    required_error: "Proszę wybrać kierunek drogi.",
-  }),
-  roadNumber: z.string().nonempty({
-    message: "Numer drogi nie może być pusty.",
-  }),
-  roadwayNumber: z.string().nonempty({
-    message: "Numer jezdni nie może być pusty.",
-  }),
-  laneNumber: z.string().nonempty({
-    message: "Numer pasa nie może być pusty.",
-  }),
-});
+import { formSchema } from "@/lib/form-schema";
 
 const UploadForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      file: null,
       roadNumber: "",
       roadwayNumber: "",
       laneNumber: "",
@@ -48,42 +29,58 @@ const UploadForm = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
-    // try {
-    //   const data = new FormData();
-    //   data.set("file", file);
-    //   const res = await fetch("/api/upload", {
-    //     method: "POST",
-    //     body: data,
-    //   });
-    //   // handle the error
-    //   if (!res.ok) throw new Error(await res.text());
-    // } catch (e: any) {
-    //   // Handle errors here
-    //   console.error(e);
-    // }
-  }
+    if (!values) return;
 
-  // if (!file) return;
+    const {
+      file: { 0: file },
+      roadNumber,
+      roadwayNumber,
+      laneNumber,
+      type,
+    } = values;
+
+    try {
+      const data = new FormData();
+      data.append("file", file);
+      data.append("roadNumber", roadNumber);
+      data.append("roadwayNumber", roadwayNumber);
+      data.append("laneNumber", laneNumber);
+      data.append("type", type!);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+      // @todo handle errors
+      console.log(res);
+      if (!res.ok) throw new Error(await res.text());
+      if (res.ok) {
+        // form.reset(); only for development processs
+      }
+    } catch (e: any) {
+      console.error(e);
+    }
+  }
 
   return (
     <div className="w-2/3">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="">
+        <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
             control={form.control}
             name="file"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prześlij plik</FormLabel>
+                <FormLabel htmlFor="file">Prześlij plik</FormLabel>
                 <FormControl>
                   <Input
                     type="file"
-                    accept=".mdb"
+                    accept=".mdb, .fwd"
+                    {...form.register("file")}
+                    defaultValue={field.value}
+                    multiple={false}
                     disabled={form.formState.isSubmitting}
                     placeholder="Wybierz plik"
-                    ref={field.ref}
-                    onChange={(e) => field.onChange(e.target.files)}
                   />
                 </FormControl>
                 <FormDescription>
@@ -146,18 +143,18 @@ const UploadForm = () => {
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
+                      {...form.register("type")}
                       className="flex pt-2"
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="desc" />
+                          <RadioGroupItem value="desc" ref={field.ref} />
                         </FormControl>
                         <FormLabel className="font-normal">Malejący</FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="asc" />
+                          <RadioGroupItem value="asc" ref={field.ref} />
                         </FormControl>
                         <FormLabel className="font-normal">Rosnący</FormLabel>
                       </FormItem>
