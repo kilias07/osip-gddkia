@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "@/components/ui/navbar";
 import { TailwindIndicator } from "@/components/tailwind-indicator";
+import { Toaster } from "sonner";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +20,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} md:mx-6 xl:mx-0`}>
         <ThemeProvider attribute="class" defaultTheme="system">
           <Navbar />
           {children}
           <TailwindIndicator />
+          <Toaster richColors />
         </ThemeProvider>
       </body>
     </html>

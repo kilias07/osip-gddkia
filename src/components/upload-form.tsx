@@ -16,6 +16,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { formSchema } from "@/lib/form-schema";
+import { toast } from "sonner";
 
 const UploadForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -39,31 +40,36 @@ const UploadForm = () => {
       type,
     } = values;
 
-    try {
-      const data = new FormData();
-      data.append("file", file);
-      data.append("roadNumber", roadNumber);
-      data.append("roadwayNumber", roadwayNumber);
-      data.append("laneNumber", laneNumber);
-      data.append("type", type!);
+    const data = new FormData();
+    data.append("file", file);
+    data.append("roadNumber", roadNumber);
+    data.append("roadwayNumber", roadwayNumber);
+    data.append("laneNumber", laneNumber);
+    data.append("type", type!);
 
+    try {
       const res = await fetch("/api/upload", {
         method: "POST",
         body: data,
       });
-      // @todo handle errors
-      console.log(res);
       if (!res.ok) throw new Error(await res.text());
       if (res.ok) {
-        // form.reset(); only for development processs
+        form.reset();
+        toast.success("Plik został przesłany");
       }
     } catch (e: any) {
       console.error(e);
+      const { error } = JSON.parse(e.message);
+      toast.error(
+        error === "File already exists"
+          ? "Plik o podanych parametrach już istnieje"
+          : error
+      );
     }
   }
 
   return (
-    <div className="w-2/3">
+    <div className="max-w-screen-xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <FormField
@@ -90,12 +96,12 @@ const UploadForm = () => {
               </FormItem>
             )}
           />
-          <div className="flex justify-between my-10 gap-4">
+          <div className="flex my-10 gap-8 lg:gap-10 flex-wrap">
             <FormField
               control={form.control}
               name="roadNumber"
               render={({ field }) => (
-                <FormItem className="grow">
+                <FormItem className="w-full sm:w-fit">
                   <FormLabel>Numer drogi</FormLabel>
                   <FormControl>
                     <Input placeholder="np. 32" type="number" {...field} />
@@ -109,7 +115,7 @@ const UploadForm = () => {
               control={form.control}
               name="roadwayNumber"
               render={({ field }) => (
-                <FormItem className="grow">
+                <FormItem className="w-full sm:w-fit">
                   <FormLabel>Numer jezdni</FormLabel>
                   <FormControl>
                     <Input placeholder="np. 32" type="number" {...field} />
@@ -123,7 +129,7 @@ const UploadForm = () => {
               control={form.control}
               name="laneNumber"
               render={({ field }) => (
-                <FormItem className="grow">
+                <FormItem className="w-full sm:w-fit">
                   <FormLabel>Numer pasa</FormLabel>
                   <FormControl>
                     <Input placeholder="np. 1" type="number" {...field} />
@@ -138,7 +144,7 @@ const UploadForm = () => {
               control={form.control}
               name="type"
               render={({ field }) => (
-                <FormItem className="space-y-3">
+                <FormItem className="space-y-3 w-full sm:w-fit">
                   <FormLabel>Wybierz kierunek drogi</FormLabel>
                   <FormControl>
                     <RadioGroup
@@ -148,15 +154,27 @@ const UploadForm = () => {
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="desc" ref={field.ref} />
+                          <RadioGroupItem
+                            value="desc"
+                            id="input_desc"
+                            ref={field.ref}
+                          />
                         </FormControl>
-                        <FormLabel className="font-normal">Malejący</FormLabel>
+                        <FormLabel className="font-normal" htmlFor="input_desc">
+                          Malejący
+                        </FormLabel>
                       </FormItem>
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
-                          <RadioGroupItem value="asc" ref={field.ref} />
+                          <RadioGroupItem
+                            id="input_asc"
+                            value="asc"
+                            ref={field.ref}
+                          />
                         </FormControl>
-                        <FormLabel className="font-normal">Rosnący</FormLabel>
+                        <FormLabel className="font-normal" htmlFor="input_asc">
+                          Rosnący
+                        </FormLabel>
                       </FormItem>
                     </RadioGroup>
                   </FormControl>

@@ -2,7 +2,7 @@ import UploadForm from "@/components/upload-form";
 
 const AddResults = () => {
   return (
-    <div className="flex justify-center items-center mt-20">
+    <div className="flex justify-center items-center mt-20 container">
       <UploadForm />
     </div>
   );

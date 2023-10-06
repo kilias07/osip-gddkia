@@ -16,10 +16,7 @@ export async function POST(request: NextRequest) {
   const data = await request.formData();
 
   if (!data) {
-    return NextResponse.json(
-      { success: false, error: "no payload" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "no payload" }, { status: 400 });
   }
   const userInput = {
     type: data.get("type") as "asc" | "desc",
@@ -34,10 +31,7 @@ export async function POST(request: NextRequest) {
 
   const roadDir = await readdir(join(process.cwd(), "road-files"));
   if (roadDir.includes(fileName)) {
-    return NextResponse.json(
-      { success: false, error: "File already exists" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "File already exists" }, { status: 409 });
   }
 
   const formData: Data = {
@@ -48,18 +42,18 @@ export async function POST(request: NextRequest) {
   const ext = formData.file.name.split(".").pop();
   const path = join(process.cwd(), "road-files", `${fileName}`);
 
-  if (ext === "mdb") {
+  if (ext === "mdb" || ext === "MDB") {
     const params = await getMDBData(formData);
     const JSONData = JSON.stringify(params);
     await writeFile(path, JSONData);
     return NextResponse.json({ success: true }, { status: 200 });
   }
-  if (ext === "fwd") {
+  if (ext === "fwd" || ext === "FWD") {
+    const params = await getFWDData(formData);
+    // const JSONData = JSON.stringify(params);
+    // await writeFile(path, JSONData);
     return NextResponse.json({ success: true }, { status: 200 });
   }
 
-  return NextResponse.json(
-    { success: false, error: "Invalid file type" },
-    { status: 400 }
-  );
+  return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
 }

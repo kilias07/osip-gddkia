@@ -19,17 +19,17 @@ const Navbar = () => {
   return (
     <nav>
       <div
-        className="container mx-auto flex items-center px-4 pt-[10px] md:px-0"
+        className="container mx-auto flex items-center justify-between pt-[10px] md:px-0"
         ref={refNav}
       >
-        <div>
+        <div className="relative z-50">
           <Link
             href="/"
-            className="relative z-50 inline-block text-5xl uppercase font-medium"
+            className="inline-block text-5xl uppercase font-medium"
             as="/"
           >
             osip
-            <span className="text-xs font-light">GDDKiA</span>
+            <span className="-ml-2 text-xs font-light">GDDKiA</span>
           </Link>
         </div>
         <div className="md:hidden grow text-right mr-4">
