@@ -19,7 +19,7 @@ const getAllRoadsResults = async () => {
 
 const ShowResults = async () => {
   const roadsResults = await getAllRoadsResults();
-  // console.log(roadsResults);
+  console.log(roadsResults);
   return (
     <div>
       to jest road number <span>adssa</span>
