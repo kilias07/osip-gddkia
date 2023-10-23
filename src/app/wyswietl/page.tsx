@@ -1,9 +1,12 @@
 "use client";
 
+import { columns } from "@/components/road-table/columns";
+import { DataTable } from "@/components/road-table/data-table";
+import { DataAfterCalculation } from "@/types/types";
 import { useEffect, useState } from "react";
 
 const ShowResults = () => {
-  const [allData, setAllData] = useState<any>([]);
+  const [allData, setAllData] = useState<DataAfterCalculation[]>([]);
   useEffect(() => {
     setAllData(
       Object.keys(window.sessionStorage).map((key) =>
@@ -11,9 +14,13 @@ const ShowResults = () => {
       )
     );
   }, []);
+  // console.log(allData);
 
-  console.log("allData", allData);
-  return <div>to jest road number</div>;
+  return (
+    <div className="flex flex-col gap-32 justify-center items-center mt-[10rem]">
+      <DataTable data={allData} columns={columns} />
+    </div>
+  );
 };
 
 export default ShowResults;

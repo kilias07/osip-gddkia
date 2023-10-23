@@ -83,7 +83,7 @@ const UploadFormTest = () => {
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="flex items-center gap-4"
+          className="flex items gap-4 h-[128px]"
         >
           <FormField
             control={form.control}
@@ -112,7 +112,7 @@ const UploadFormTest = () => {
             )}
           />
           <Button
-            className="mt-1"
+            className="self-center mb-6"
             variant={"secondary"}
             type="submit"
             disabled={form.formState.isSubmitting}

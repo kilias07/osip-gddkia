@@ -1,3 +1,4 @@
+"use client";
 import {
   Form,
   FormControl,
@@ -16,19 +17,20 @@ import { Button } from "./ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DateInput } from "./ui/date-input";
 import { toast } from "sonner";
+import { DataAfterCalculation } from "@/types/types";
 
 const formSchema = z.object({
   type: z.enum(["asc", "desc"], {
-    required_error: "Proszę wybrać kierunek drogi.",
+    invalid_type_error: "Proszę wybrać kierunek drogi.",
   }),
-  roadNumber: z.string().nonempty({
-    message: "Numer drogi nie może być pusty.",
+  roadNumber: z.string({
+    required_error: "Numer drogi jest wymagany.",
   }),
-  roadwayNumber: z.string().nonempty({
-    message: "Numer jezdni nie może być pusty.",
+  roadwayNumber: z.string({
+    required_error: "Numer jezdni jest wymagany.",
   }),
-  laneNumber: z.string().nonempty({
-    message: "Numer pasa nie może być pusty.",
+  laneNumber: z.string({
+    required_error: "Numer pasa jest wymagany.",
   }),
   dob: z.date({
     required_error: "Data pomiarów jest wymagana.",
@@ -57,19 +59,29 @@ const FormFileData = ({
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!values) return;
     toast.success("Plik został przesłany");
-    const response = {
+    const response: DataAfterCalculation = {
       userInput: { ...values },
       data: { ...transformedData },
       file: {
-        name: fileData?.name,
-        size: fileData?.size,
+        name: fileData?.name.toString(),
+        size: Number(fileData?.size),
       },
     };
+    const checkItem = sessionStorage.getItem(
+      `${fileData?.name}${fileData?.size}`
+    );
+    if (checkItem) {
+      toast.error("Plik o takiej nazwie już istnieje");
+      reset();
+      return;
+    }
     sessionStorage.setItem(
       `${fileData?.name}${fileData?.size}`,
       JSON.stringify(response)
     );
+    //Reset additional current form
     form.reset();
+    //Reset form from parent component
     reset();
   }
   return (

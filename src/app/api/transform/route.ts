@@ -20,7 +20,6 @@ export async function POST(request: NextRequest) {
 
   if (ext === "mdb" || ext === "MDB") {
     const params = await getMDBData(formData);
-    const JSONData = JSON.stringify(params);
     return NextResponse.json(
       { success: true, message: params },
       { status: 200 }

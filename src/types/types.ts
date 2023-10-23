@@ -33,3 +33,18 @@ export interface Drops {
   stress: number;
   d: Array<{ [key: `D${number}`]: number }>;
 }
+
+export interface DataAfterCalculation {
+  userInput: {
+    type: "asc" | "desc";
+    roadNumber: string;
+    roadwayNumber: string;
+    laneNumber: string;
+    dob: Date;
+  };
+  data: Params;
+  file: {
+    name: string | undefined;
+    size: number | undefined;
+  };
+}

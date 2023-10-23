@@ -23,7 +23,7 @@
     "date-fns": "^2.30.0",
     "lucide-react": "^0.279.0",
     "mdb-reader": "^2.2.6",
-    "next": "latest",
+    "next": "^13.5.3",
     "next-themes": "^0.2.1",
     "react": "latest",
     "react-datepicker": "^4.20.0",
@@ -34,7 +34,8 @@
     "sonner": "^1.0.3",
     "tailwind-merge": "^1.14.0",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "3.21.4"
+    "zod": "3.21.4",
+    "zustand": "^4.4.4"
   },
   "devDependencies": {
     "@types/node": "latest",
