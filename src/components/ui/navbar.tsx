@@ -35,8 +35,8 @@ const Navbar = () => {
         <div className="md:hidden grow text-right mr-4">
           <ModeToggle />
         </div>
-        <label className="hamburger-menu z-50 md:hidden" id="hamburger">
-          <input type="checkbox" ref={refInput} />
+        <label className="hamburger-menu z-50 md:hidden" htmlFor="hamburger">
+          <input type="checkbox" id="hamburger" ref={refInput} />
         </label>
         <ul
           className="absolute inset-0 flex h-[400px] -translate-y-full flex-col justify-center gap-10 bg-light-full transition-transform duration-300 md:static md:grow md:h-fit md:translate-y-0 md:flex-row md:transition-none md:[&>li:last-child]:text-right"

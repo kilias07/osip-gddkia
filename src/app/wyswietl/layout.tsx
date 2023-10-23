@@ -1,4 +1,4 @@
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  return <main className="container mx-auto bg-red-300">{children}</main>;
+  return <main className="container mx-auto">{children}</main>;
 };
 export default DashboardLayout;

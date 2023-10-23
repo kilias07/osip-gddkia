@@ -1,7 +1,8 @@
 import { NewData } from "../route";
 import MDBReader from "mdb-reader";
-import { getNonZeroXVal, getNonZeroDArr } from "@/lib/utils";
+import { getNonZeroValArr } from "@/lib/utils";
 import { randomUUID } from "crypto";
+import { Drops, Sessions, Stations } from "@/types/types";
 
 const X_PATTERN = /\bX([1-9]|\d{2})\b/;
 const D_PATTERN = /\bD([1-9]|\d{2})\b/;
@@ -18,7 +19,7 @@ export const getMDBData = async (data: NewData) => {
   return params;
 };
 
-function getSessions(reader: MDBReader) {
+function getSessions(reader: MDBReader): Sessions {
   const sessions = reader.getTable("Sessions").getData()[0];
   const getAllXCol = reader
     .getTable("Sessions")
@@ -30,20 +31,25 @@ function getSessions(reader: MDBReader) {
   const getAllXColData = reader.getTable("Sessions").getData({
     columns: getAllXCol,
   })[0];
+  const Xarr = getNonZeroValArr(getAllXColData)!;
 
   return {
-    date: sessions.Date,
+    date: String(sessions.Date),
     length: "",
     stationMinMax: {
-      min: sessions.StationMin && +(sessions.StationMin as number).toFixed(2),
-      max: sessions.StationMax && +(sessions.StationMax as number).toFixed(2),
+      min: Number((sessions.StationMin as number)?.toFixed(2)),
+      max: Number((sessions.StationMax as number)?.toFixed(2)),
     },
-    geophoneX: getNonZeroXVal(getAllXColData),
+    geophoneX: Xarr.map((x) => {
+      return {
+        [x]: sessions[x],
+      };
+    }) as Array<{ [key: `X${number}`]: number }>,
     stations: getStations(reader),
   };
 }
 
-function getStations(reader: MDBReader) {
+function getStations(reader: MDBReader): Stations[] {
   return reader
     .getTable("Stations")
     .getData()
@@ -67,10 +73,10 @@ function getStations(reader: MDBReader) {
         },
         drops: getDrops(reader, station.StationID as number),
       };
-    });
+    }) as Stations[];
 }
 
-function getDrops(reader: MDBReader, stationID: number) {
+function getDrops(reader: MDBReader, stationID: number): Drops[] {
   const getAllDCol = reader
     .getTable("Drops")
     .getColumnNames()
@@ -82,7 +88,7 @@ function getDrops(reader: MDBReader, stationID: number) {
     columns: getAllDCol,
   })[0];
 
-  const Darr = getNonZeroDArr(getAllDColData)!;
+  const Darr = getNonZeroValArr(getAllDColData)!;
 
   const data = reader
     .getTable("Drops")
@@ -99,6 +105,6 @@ function getDrops(reader: MDBReader, stationID: number) {
           };
         }),
       };
-    });
+    }) as Drops[];
   return data;
 }

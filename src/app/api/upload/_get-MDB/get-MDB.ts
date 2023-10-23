@@ -1,5 +1,5 @@
 import { Data } from "../route";
-import MDBReader, { Value } from "mdb-reader";
+import MDBReader from "mdb-reader";
 import { getNonZeroXVal, getNonZeroDArr } from "@/lib/utils";
 import { randomUUID } from "crypto";
 

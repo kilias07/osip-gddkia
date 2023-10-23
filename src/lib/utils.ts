@@ -7,26 +7,10 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 type Obj = {
-  [key: string]: Value;
+  [key: string]: number | Value;
 };
 
-export function getNonZeroXVal(obj: Obj) {
-  const keys = Object.keys(obj).reverse();
-  const res = [];
-  for (let i = 0; i < keys.length; i++) {
-    if (obj[keys[i]] !== 0) {
-      res.push(...keys.slice(i).reverse());
-      break;
-    }
-  }
-  const resObj: Obj = {};
-  res.forEach((el) => {
-    resObj[el] = obj[el];
-  });
-  return resObj;
-}
-
-export function getNonZeroDArr(obj: Obj) {
+export function getNonZeroValArr(obj: Obj) {
   const keys = Object.keys(obj).reverse();
   for (let i = 0; i < keys.length; i++) {
     if (obj[keys[i]] !== 0) {

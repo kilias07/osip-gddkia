@@ -16,14 +16,22 @@ import { Button } from "./ui/button";
 
 import { toast } from "sonner";
 import { useState } from "react";
+import FormFileData from "./form-file-data";
+import { Params } from "@/types/types";
+
+export type TransformedData = {
+  success: boolean;
+  message: Params;
+};
 
 export const formSchema = z.object({
   file: z.any().refine((files) => files?.length === 1, "Plik jest wymagany"),
 });
 
 const UploadFormTest = () => {
-  const [transformedData, setTransformedData] = useState(null);
-  console.log(transformedData?.message);
+  const [transformedData, setTransformedData] =
+    useState<TransformedData | null>(null);
+  const [fileData, setFileData] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,6 +40,12 @@ const UploadFormTest = () => {
     },
   });
 
+  const reset = () => {
+    setTransformedData(null);
+    setFileData(null);
+    form.reset();
+  };
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!values) return;
 
@@ -39,9 +53,10 @@ const UploadFormTest = () => {
       file: { 0: file },
     } = values;
 
+    setFileData(file);
+
     const data = new FormData();
     data.append("file", file);
-
     try {
       const res = await fetch("/api/transform", {
         method: "POST",
@@ -50,8 +65,7 @@ const UploadFormTest = () => {
       if (!res.ok) throw new Error(await res.text());
       if (res.ok) {
         setTransformedData(await res.json());
-        form.reset();
-        toast.success("Plik został przesłany");
+        // form.reset();
       }
     } catch (e: any) {
       console.error(e);
@@ -67,13 +81,16 @@ const UploadFormTest = () => {
   return (
     <div className="max-w-screen-xl">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="flex items-center gap-4"
+        >
           <FormField
             control={form.control}
             name="file"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="file">Prześlij plik</FormLabel>
+              <FormItem className="grow">
+                <FormLabel htmlFor="fileInput">Prześlij plik</FormLabel>
                 <FormControl>
                   <Input
                     type="file"
@@ -83,6 +100,8 @@ const UploadFormTest = () => {
                     multiple={false}
                     disabled={form.formState.isSubmitting}
                     placeholder="Wybierz plik"
+                    id="fileInput"
+                    className="grow"
                   />
                 </FormControl>
                 <FormDescription>
@@ -92,11 +111,23 @@ const UploadFormTest = () => {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={form.formState.isSubmitting}>
-            Submit
+          <Button
+            className="mt-1"
+            variant={"secondary"}
+            type="submit"
+            disabled={form.formState.isSubmitting}
+          >
+            Prześlij
           </Button>
         </form>
       </Form>
+      {transformedData?.message && (
+        <FormFileData
+          transformedData={transformedData.message}
+          fileData={fileData}
+          reset={reset}
+        />
+      )}
     </div>
   );
 };
