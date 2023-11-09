@@ -31,7 +31,7 @@ const ShowResults = () => {
       return station.GPS;
     });
   });
-  console.log("gps", gps[0]);
+  // console.log("gps", gps[0]);
   return (
     <div className="">
       {allData && (
