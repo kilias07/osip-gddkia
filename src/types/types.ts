@@ -50,6 +50,5 @@ export interface DataAfterCalculation {
   file: {
     name: string;
     size: number;
-    filePath: string;
   };
 }

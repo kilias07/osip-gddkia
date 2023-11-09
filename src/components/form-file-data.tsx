@@ -66,7 +66,6 @@ const FormFileData = ({
       file: {
         name: fileData!.name.toString(),
         size: Number(fileData?.size),
-        // filePath: fileData!.path.toString(),
       },
     };
 
