@@ -18,6 +18,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DateInput } from "./ui/date-input";
 import { toast } from "sonner";
 import { DataAfterCalculation } from "@/types/types";
+import { useData } from "@/lib/store-zustand";
 
 const formSchema = z.object({
   type: z.enum(["asc", "desc"], {
@@ -48,6 +49,8 @@ const FormFileData = ({
   fileData,
   reset,
 }: FormFileDataProps) => {
+  const { setData } = useData((state) => state);
+
   const numberOfKm = fileData?.name.split(" ")[0];
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -55,30 +58,27 @@ const FormFileData = ({
       dob: new Date(transformedData.sessions.date),
     },
   });
-
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!values) return;
-    toast.success("Plik został przesłany");
     const response: DataAfterCalculation = {
       userInput: { ...values },
       data: { ...transformedData },
       file: {
-        name: fileData?.name.toString(),
+        name: fileData!.name.toString(),
         size: Number(fileData?.size),
+        // filePath: fileData!.path.toString(),
       },
     };
-    const checkItem = sessionStorage.getItem(
-      `${fileData?.name}${fileData?.size}`
-    );
-    if (checkItem) {
+
+    try {
+      setData(response);
+      toast.success("Plik został przesłany");
+    } catch (e) {
       toast.error("Plik o takiej nazwie już istnieje");
+
       reset();
-      return;
     }
-    sessionStorage.setItem(
-      `${fileData?.name}${fileData?.size}`,
-      JSON.stringify(response)
-    );
+
     //Reset additional current form
     form.reset();
     //Reset form from parent component
@@ -218,7 +218,7 @@ const FormFileData = ({
             <span>{numberOfKm}</span>
           </p>
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            Submit
+            Zatwierdź
           </Button>
         </form>
       </Form>

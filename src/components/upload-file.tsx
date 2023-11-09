@@ -31,6 +31,7 @@ export const formSchema = z.object({
 const UploadFormTest = () => {
   const [transformedData, setTransformedData] =
     useState<TransformedData | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [fileData, setFileData] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,27 +55,23 @@ const UploadFormTest = () => {
     } = values;
 
     setFileData(file);
+    setLoading(true);
 
     const data = new FormData();
     data.append("file", file);
-    try {
-      const res = await fetch("/api/transform", {
-        method: "POST",
-        body: data,
-      });
-      if (!res.ok) throw new Error(await res.text());
-      if (res.ok) {
-        setTransformedData(await res.json());
-        // form.reset();
-      }
-    } catch (e: any) {
-      console.error(e);
-      const { error } = JSON.parse(e.message);
-      toast.error(
-        error === "File already exists"
-          ? "Plik o podanych parametrach już istnieje"
-          : error
-      );
+
+    const res = await fetch("/api/transform", {
+      method: "POST",
+      body: data,
+    });
+    if (res.ok) {
+      setTransformedData(await res.json());
+      setLoading(false);
+    } else {
+      setLoading(false);
+      const { error } = await res.json();
+      toast.error(error);
+      reset();
     }
   }
 
@@ -98,6 +95,10 @@ const UploadFormTest = () => {
                     {...form.register("file")}
                     defaultValue={field.value}
                     multiple={false}
+                    // onChange={(e) => {
+                    //   const file = e.target.files![0];
+                    //   file && setFileData(file);
+                    // }}
                     disabled={form.formState.isSubmitting}
                     placeholder="Wybierz plik"
                     id="fileInput"
@@ -117,11 +118,25 @@ const UploadFormTest = () => {
             type="submit"
             disabled={form.formState.isSubmitting}
           >
-            Prześlij
+            Wczytaj
           </Button>
         </form>
       </Form>
-      {transformedData?.message && (
+
+      {loading ? (
+        <div
+          className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+          role="status"
+        >
+          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+            Ładuję...
+          </span>
+        </div>
+      ) : (
+        " "
+      )}
+
+      {transformedData && (
         <FormFileData
           transformedData={transformedData.message}
           fileData={fileData}

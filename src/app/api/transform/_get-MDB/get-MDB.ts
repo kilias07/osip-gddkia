@@ -1,110 +1,126 @@
-import { NewData } from "../route";
+import { IncomingData } from "../route";
 import MDBReader from "mdb-reader";
-import { getNonZeroValArr } from "@/lib/utils";
+import {
+  BCIIndicator,
+  BDIIndicator,
+  SCIIndicator,
+  getNonZeroValArr,
+} from "@/lib/utils";
 import { randomUUID } from "crypto";
 import { Drops, Sessions, Stations } from "@/types/types";
 
 const X_PATTERN = /\bX([1-9]|\d{2})\b/;
 const D_PATTERN = /\bD([1-9]|\d{2})\b/;
 
-export const getMDBData = async (data: NewData) => {
+export const getMDBData = async (data: IncomingData) => {
   const bytes = await data.file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const reader = new MDBReader(buffer);
+  let geophoneX = <Sessions["geophoneX"]>[];
+  let asphalftTemp = <null | number>null;
+
+  function getSessions(reader: MDBReader): Sessions {
+    const sessions = reader.getTable("Sessions").getData()[0];
+    const getAllXCol = reader
+      .getTable("Sessions")
+      .getColumnNames()
+      .filter((header) => {
+        return header.match(X_PATTERN);
+      });
+
+    const getAllXColData = reader.getTable("Sessions").getData({
+      columns: getAllXCol,
+    })[0];
+    const Xarr = getNonZeroValArr(getAllXColData)!;
+    geophoneX = Xarr.map((x) => {
+      return {
+        name: x,
+        value: sessions[x],
+      };
+    }) as Array<{ name: `X${number}`; value: number }>;
+
+    return {
+      date: String(sessions.Date),
+      length: (Number(sessions.StationMax) - Number(sessions.StationMin))
+        .toFixed(2)
+        .toString(),
+      stationMinMax: {
+        min: Number((sessions.StationMin as number)?.toFixed(2)),
+        max: Number((sessions.StationMax as number)?.toFixed(2)),
+      },
+      geophoneX,
+      radius: Number(sessions.Radius),
+      stations: getStations(reader),
+    };
+  }
+
+  function getStations(reader: MDBReader): Stations[] {
+    return <Stations[]>reader
+      .getTable("Stations")
+      .getData()
+      .map((station) => {
+        asphalftTemp = +(station.AsphaltTemperature as number).toFixed(3);
+        return {
+          stationID: station.StationID,
+          station: +(station.Station as number).toFixed(3),
+          asphalftTemp,
+          surfaceTemp: +(station.SurfaceTemperature as number).toFixed(3),
+          airTemp: +(station.AirTemperature as number).toFixed(3),
+          time: station.Time,
+          GPS: {
+            long: station.Longitude,
+            lat: station.Latitude,
+          },
+          drops: getDrops(reader, station.StationID as number),
+        };
+      });
+  }
+
+  function getDrops(reader: MDBReader, stationID: number): Drops[] {
+    const getAllDCol = reader
+      .getTable("Drops")
+      .getColumnNames()
+      .filter((header) => {
+        return header.match(D_PATTERN);
+      });
+
+    const getAllDColData = reader.getTable("Drops").getData({
+      columns: getAllDCol,
+    })[0];
+
+    const Darr = getNonZeroValArr(getAllDColData)!;
+
+    const data = <Drops[]>reader
+      .getTable("Drops")
+      .getData()
+      .filter((drop) => drop.StationID === stationID)
+      .map((drop) => {
+        const drops = Darr.map((d) => {
+          return {
+            [d]: +(drop[d] as number).toFixed(2),
+          };
+        });
+
+        const stress = drop.Stress && +(drop.Stress as number).toFixed(2);
+
+        const force = +(drop.Force as number).toFixed(2);
+
+        return {
+          force,
+          stress,
+          drops,
+          SCI: SCIIndicator(geophoneX, force, asphalftTemp!, drops),
+          BDI: BDIIndicator(geophoneX, force, asphalftTemp!, drops),
+          BCI: BCIIndicator(geophoneX, force, asphalftTemp!, drops),
+        };
+      });
+    return data;
+  }
 
   const params = {
     id: randomUUID(),
     sessions: getSessions(reader),
   };
+
   return params;
 };
-
-function getSessions(reader: MDBReader): Sessions {
-  const sessions = reader.getTable("Sessions").getData()[0];
-  const getAllXCol = reader
-    .getTable("Sessions")
-    .getColumnNames()
-    .filter((header) => {
-      return header.match(X_PATTERN);
-    });
-
-  const getAllXColData = reader.getTable("Sessions").getData({
-    columns: getAllXCol,
-  })[0];
-  const Xarr = getNonZeroValArr(getAllXColData)!;
-
-  return {
-    date: String(sessions.Date),
-    length: "",
-    stationMinMax: {
-      min: Number((sessions.StationMin as number)?.toFixed(2)),
-      max: Number((sessions.StationMax as number)?.toFixed(2)),
-    },
-    geophoneX: Xarr.map((x) => {
-      return {
-        [x]: sessions[x],
-      };
-    }) as Array<{ [key: `X${number}`]: number }>,
-    stations: getStations(reader),
-  };
-}
-
-function getStations(reader: MDBReader): Stations[] {
-  return reader
-    .getTable("Stations")
-    .getData()
-    .map((station) => {
-      return {
-        stationID: station.StationID,
-        station: station.Station && +(station.Station as number).toFixed(2),
-        asphalftTemp:
-          station.AsphaltTemperature &&
-          +(station.AsphaltTemperature as number).toFixed(2),
-        surfaceTemp:
-          station.SurfaceTemperature &&
-          +(station.SurfaceTemperature as number).toFixed(2),
-        airTemp:
-          station.AirTemperature &&
-          +(station.AirTemperature as number).toFixed(2),
-        time: station.Time,
-        GPS: {
-          long: station.Longitude,
-          lat: station.Latitude,
-        },
-        drops: getDrops(reader, station.StationID as number),
-      };
-    }) as Stations[];
-}
-
-function getDrops(reader: MDBReader, stationID: number): Drops[] {
-  const getAllDCol = reader
-    .getTable("Drops")
-    .getColumnNames()
-    .filter((header) => {
-      return header.match(D_PATTERN);
-    });
-
-  const getAllDColData = reader.getTable("Drops").getData({
-    columns: getAllDCol,
-  })[0];
-
-  const Darr = getNonZeroValArr(getAllDColData)!;
-
-  const data = reader
-    .getTable("Drops")
-    .getData()
-    .filter((drop) => drop.StationID === stationID)
-    .map((drop) => {
-      return {
-        dropID: drop.DropID,
-        force: drop.Force,
-        stress: drop.Stress,
-        d: Darr.map((d) => {
-          return {
-            [d]: drop[d],
-          };
-        }),
-      };
-    }) as Drops[];
-  return data;
-}

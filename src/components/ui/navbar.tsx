@@ -1,14 +1,8 @@
 "use client";
 
-const MENU_ITEMS = [
-  { title: "OSIP", link: "/" },
-  { title: "wyświetl wyniki", link: "/wyswietl" },
-  { title: "dodaj wyniki", link: "/dodaj" },
-] as const;
-
 import Link from "next/link";
 import { useRef } from "react";
-import useOnClickOutside from "@/lib/useClickOutside";
+import useOnClickOutside from "@/lib/use-click-outside";
 import { ModeToggle } from "../mode-toggle";
 
 const Navbar = () => {
@@ -17,9 +11,9 @@ const Navbar = () => {
   useOnClickOutside(refNav, () => (refInput.current!.checked = false));
 
   return (
-    <nav>
+    <nav className="">
       <div
-        className="container mx-auto flex items-center justify-between pt-[10px] md:px-0"
+        className="container mx-auto flex items-center justify-between mt-[10px]"
         ref={refNav}
       >
         <div className="relative z-50">
@@ -28,8 +22,8 @@ const Navbar = () => {
             className="inline-block text-5xl uppercase font-medium"
             as="/"
           >
-            osip
-            <span className="-ml-2 text-xs font-light">GDDKiA</span>
+            osad
+            <span className="-ml-1 text-xs font-light">GDDKiA</span>
           </Link>
         </div>
         <div className="md:hidden grow text-right mr-4">
@@ -39,7 +33,7 @@ const Navbar = () => {
           <input type="checkbox" id="hamburger" ref={refInput} />
         </label>
         <ul
-          className="absolute inset-0 flex h-[400px] -translate-y-full flex-col justify-center gap-10 bg-light-full transition-transform duration-300 md:static md:grow md:h-fit md:translate-y-0 md:flex-row md:transition-none md:[&>li:last-child]:text-right"
+          className="absolute bg-white dark:bg-slate-950 inset-0 flex h-[400px] -translate-y-full flex-col justify-center gap-10 bg-light-full transition-transform duration-300 md:static md:grow md:h-fit md:translate-y-0 md:flex-row md:transition-none md:[&>li:last-child]:text-right items-center"
           id="navLinks"
         >
           <li>
@@ -49,7 +43,7 @@ const Navbar = () => {
             <Link href="/dodaj"> dodaj wyniki</Link>
           </li>
         </ul>
-        <div className="hidden md:block">
+        <div className="hidden md:block relative z-50">
           <ModeToggle />
         </div>
       </div>

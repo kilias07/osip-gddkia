@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useState } from "react";
+import { DataAfterCalculation } from "@/types/types";
 
 const data: Payment[] = [
   {
@@ -82,7 +83,7 @@ export type Payment = {
   email: string;
 };
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<DataAfterCalculation>[] = [
   {
     id: "select",
     header: ({ table }) => (

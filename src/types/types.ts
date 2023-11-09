@@ -10,7 +10,8 @@ export interface Sessions {
     min: number;
     max: number;
   };
-  geophoneX: Array<{ [key: `X${number}`]: number }>;
+  geophoneX: Array<{ name: `X${number}`; value: number }>;
+  radius: number;
   stations: Stations[];
 }
 
@@ -25,13 +26,16 @@ export interface Stations {
     long: number;
     lat: number;
   };
+  drops: Drops[];
 }
 
 export interface Drops {
-  dropID: number;
   force: number;
   stress: number;
-  d: Array<{ [key: `D${number}`]: number }>;
+  drops: Array<{ [key: `D${number}`]: number }>;
+  SCI: number;
+  BDI: number;
+  BCI: number;
 }
 
 export interface DataAfterCalculation {
@@ -44,7 +48,8 @@ export interface DataAfterCalculation {
   };
   data: Params;
   file: {
-    name: string | undefined;
-    size: number | undefined;
+    name: string;
+    size: number;
+    filePath: string;
   };
 }

@@ -30,22 +30,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import Link from "next/link";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableShowProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  rowSelection: {};
+  setRowSelection: Dispatch<SetStateAction<{}>>;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTableShow<TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+  rowSelection,
+  setRowSelection,
+}: DataTableShowProps<TData, TValue>) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
 
   const table = useReactTable({
     data,

@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getMDBData } from "./_get-MDB/get-MDB";
+import { getFWDData } from "./_get-FWD/get-FWD";
 
-export type NewData = {
+export type IncomingData = {
   file: File;
 };
 
@@ -12,19 +13,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "no payload" }, { status: 400 });
   }
 
-  const formData: NewData = {
+  const formData: IncomingData = {
     file: data.get("file") as File,
   };
 
-  const ext = formData.file.name.split(".").pop();
+  const ext = formData.file.name.split(".").pop()?.toLowerCase();
 
-  if (ext === "mdb" || ext === "MDB") {
-    const params = await getMDBData(formData);
-    return NextResponse.json(
-      { success: true, message: params },
-      { status: 200 }
-    );
+  switch (ext) {
+    case "fwd": {
+      try {
+        const params = await getFWDData(formData);
+        return NextResponse.json(
+          { success: true, message: params },
+          { status: 200 }
+        );
+      } catch (error) {
+        if (error instanceof Error)
+          return NextResponse.json({ error: error.message }, { status: 501 });
+      }
+    }
+    case "mdb": {
+      const params = await getMDBData(formData);
+      return NextResponse.json(
+        { success: true, message: params },
+        { status: 200 }
+      );
+    }
+    default:
+      return NextResponse.json(
+        { error: "Nieprawidłowy typ pliku" },
+        { status: 400 }
+      );
   }
-
-  return NextResponse.json({ error: "Invalid file type" }, { status: 400 });
 }
