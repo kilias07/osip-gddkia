@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getMDBData } from "./_get-MDB/get-MDB";
-import { getFWDData } from "./_get-FWD/get-FWD";
+import { getMDBData } from "./get-MDB";
+import { getFWDData } from "./get-FWD";
 
 export type IncomingData = {
   file: File;

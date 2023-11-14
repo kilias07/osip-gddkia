@@ -1,10 +1,10 @@
-import ColorPicker from "@/components/ui/color-picker";
+import { redirect } from "next/navigation";
 
 const Home = () => {
+  redirect("/dodaj");
   return (
-    <main className="">
-      <div>tu będzie strona</div>
-      {/* <ColorPicker /> */}
+    <main className="w-full h-screen flex justify-center items-center">
+      <p className="text-2xl">treść strony będzie dodana w przyszłości</p>
     </main>
   );
 };

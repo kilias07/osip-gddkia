@@ -1,5 +1,5 @@
 import { Sessions, Stations } from "@/types/types";
-import { IncomingData } from "../route";
+import { IncomingData } from "./route";
 import { randomUUID } from "crypto";
 import {
   BCIIndicator,
@@ -7,7 +7,8 @@ import {
   SCIIndicator,
   getFWDDate,
   getGeophoneData,
-} from "@/lib/utils";
+} from "./utils";
+import { orderStations } from "./utils";
 
 export const getFWDData = async (data: IncomingData) => {
   const bytes = await data.file.arrayBuffer();
@@ -29,7 +30,6 @@ function getSession(fileData: string): Sessions {
   const lines = fileData.split(/\r\n|\n|\r/); //split file by line
   const startKMTest = lines[7].substring(17, 24); //in case this wont work, try to use More preciouse function like below
   const endKM = lines[7].substring(25, 33);
-
   //This is index of start of stations
   const strPos = fileData.lastIndexOf("*");
 
@@ -42,7 +42,8 @@ function getSession(fileData: string): Sessions {
 
   const stationsString = fileData.slice(strPos, endOfFile);
   const stations = getStations(stationsString, date, radius, geophoneX);
-  console.log(stations);
+
+  const orderedStations = orderStations(stations);
 
   return <Sessions>{
     date: date.toString(),
@@ -53,7 +54,7 @@ function getSession(fileData: string): Sessions {
     },
     geophoneX,
     radius,
-    stations,
+    stations: orderedStations,
   };
 }
 
@@ -84,6 +85,8 @@ function getStations(
       const stationLine = stationsRawArray[i]
         .split(" ")
         .filter((x) => x !== "");
+      const [, long, , lat] = stationsRawArray[i - 1].split(" ");
+
       const minutes = Number(stationLine[stationLine.length - 1].slice(3));
       const hours = Number(stationLine[stationLine.length - 1].slice(1, 3));
 
@@ -98,13 +101,16 @@ function getStations(
         airTemp,
         time: new Date(date.setHours(hours, minutes)).toString(),
         GPS: {
-          long: 0,
-          lat: 0,
+          long: +long,
+          lat: +lat,
         },
         drops: [],
       });
     } else {
       const rowDrops = stationsRawArray[i].split(" ").filter((x) => x !== "");
+
+      //we skip the gps line that will always be 3 elements long
+      if (rowDrops.length === 3) continue;
       const stress = +rowDrops.shift()!;
 
       const getDrops = rowDrops.map((el, index) => {

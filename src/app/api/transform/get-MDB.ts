@@ -1,11 +1,12 @@
-import { IncomingData } from "../route";
+import { IncomingData } from "./route";
 import MDBReader from "mdb-reader";
 import {
   BCIIndicator,
   BDIIndicator,
   SCIIndicator,
   getNonZeroValArr,
-} from "@/lib/utils";
+  orderStations,
+} from "./utils";
 import { randomUUID } from "crypto";
 import { Drops, Sessions, Stations } from "@/types/types";
 
@@ -39,6 +40,8 @@ export const getMDBData = async (data: IncomingData) => {
       };
     }) as Array<{ name: `X${number}`; value: number }>;
 
+    const orderedStations = orderStations(getStations(reader));
+
     return {
       date: String(sessions.Date),
       length: (Number(sessions.StationMax) - Number(sessions.StationMin))
@@ -50,7 +53,7 @@ export const getMDBData = async (data: IncomingData) => {
       },
       geophoneX,
       radius: Number(sessions.Radius),
-      stations: getStations(reader),
+      stations: orderedStations,
     };
   }
 

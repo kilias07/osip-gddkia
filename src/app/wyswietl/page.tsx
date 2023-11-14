@@ -8,6 +8,8 @@ import { DataTableShow } from "./components/data-table-show";
 import { DataAfterCalculation } from "@/types/types";
 import { columnsShow } from "./components/columns";
 import dynamic from "next/dynamic";
+import TestChart from "../dodaj/components/test-chart";
+import NewCharts from "./components/new-charts";
 
 const Map = dynamic(() => import("./components/map"), {
   ssr: false,
@@ -31,9 +33,9 @@ const ShowResults = () => {
       return station.GPS;
     });
   });
-  // console.log("gps", gps[0]);
+
   return (
-    <div className="">
+    <div className="mt-10">
       {allData && (
         <DataTableShow
           rowSelection={rowSelection}
@@ -43,9 +45,10 @@ const ShowResults = () => {
         />
       )}
       {filteredSelectedData.length > 0 ? (
-        <div className="flex">
-          <Charts selectedData={filteredSelectedData} />
-          <Map />
+        <div>
+          {/* <Charts selectedData={filteredSelectedData} /> */}
+          <NewCharts selectedData={filteredSelectedData} />
+          {/* <Map /> */}
         </div>
       ) : null}
     </div>

@@ -201,7 +201,7 @@ export function DataTableShow<TData, TValue>({
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Nasępna
+            Następna
           </Button>
         </div>
       </div>

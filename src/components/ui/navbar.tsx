@@ -4,10 +4,14 @@ import Link from "next/link";
 import { useRef } from "react";
 import useOnClickOutside from "@/lib/use-click-outside";
 import { ModeToggle } from "../mode-toggle";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const Navbar = () => {
   const refNav = useRef<HTMLDivElement>(null);
+  const pathName = usePathname();
   const refInput = useRef<HTMLInputElement>(null);
+  const handleClick = () => (refInput.current!.checked = false);
   useOnClickOutside(refNav, () => (refInput.current!.checked = false));
 
   return (
@@ -33,14 +37,32 @@ const Navbar = () => {
           <input type="checkbox" id="hamburger" ref={refInput} />
         </label>
         <ul
-          className="absolute bg-white dark:bg-slate-950 inset-0 flex h-[400px] -translate-y-full flex-col justify-center gap-10 bg-light-full transition-transform duration-300 md:static md:grow md:h-fit md:translate-y-0 md:flex-row md:transition-none md:[&>li:last-child]:text-right items-center"
+          className="absolute bg-white dark:bg-slate-950 inset-0 z-40 flex h-[400px] -translate-y-full flex-col justify-center gap-10 bg-light-full transition-transform duration-300 md:static md:grow md:h-fit md:translate-y-0 md:flex-row md:transition-none md:[&>li:last-child]:text-right text-sm font-medium items-center"
           id="navLinks"
         >
-          <li>
-            <Link href="/wyswietl"> wyswietl wyniki</Link>
+          <li
+            className={`${cn(
+              "py-1 uppercase",
+              pathName === "/wyswietl"
+                ? "border-b-2 border-slate-950 dark:border-white"
+                : "border-0"
+            )}`}
+          >
+            <Link href="/wyswietl" onClick={handleClick}>
+              wyświetl wyniki
+            </Link>
           </li>
-          <li>
-            <Link href="/dodaj"> dodaj wyniki</Link>
+          <li
+            className={`${cn(
+              "py-1 uppercase",
+              pathName === "/dodaj"
+                ? "border-b-2 border-slate-950 dark:border-white"
+                : "border-0"
+            )}`}
+          >
+            <Link href="/dodaj" onClick={handleClick}>
+              dodaj wyniki
+            </Link>
           </li>
         </ul>
         <div className="hidden md:block relative z-50">

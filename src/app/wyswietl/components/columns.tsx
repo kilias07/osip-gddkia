@@ -90,7 +90,7 @@ export const columnsShow: ColumnDef<DataAfterCalculation>[] = [
   },
   {
     accessorKey: "userInput.type",
-    header: "Kierunek",
+    header: "Kilometraż",
     id: "type",
     cell: ({ row }) => {
       const type = row.getValue("type");

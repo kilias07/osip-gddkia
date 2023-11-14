@@ -7,15 +7,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "./ui/form";
+} from "../../../components/ui/form";
 import { TransformedData } from "./upload-file";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Input } from "../../../components/ui/input";
+import { Button } from "../../../components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DateInput } from "./ui/date-input";
+import { DateInput } from "../../../components/ui/date-input";
 import { toast } from "sonner";
 import { DataAfterCalculation } from "@/types/types";
 import { useData } from "@/lib/store-zustand";
@@ -58,6 +58,7 @@ const FormFileData = ({
       dob: new Date(transformedData.sessions.date),
     },
   });
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!values) return;
     const response: DataAfterCalculation = {
@@ -165,9 +166,7 @@ const FormFileData = ({
               name="type"
               render={({ field }) => (
                 <FormItem className="space-y-3 w-full sm:w-fit">
-                  <FormLabel htmlFor="asc_desc">
-                    Wybierz kierunek drogi
-                  </FormLabel>
+                  <FormLabel htmlFor="asc_desc">Kilometraż</FormLabel>
                   <FormControl>
                     <RadioGroup
                       onValueChange={field.onChange}
@@ -212,10 +211,6 @@ const FormFileData = ({
               )}
             />
           </div>
-          <p className="flex gap-2">
-            <span>Kilometr</span>
-            <span>{numberOfKm}</span>
-          </p>
           <Button type="submit" disabled={form.formState.isSubmitting}>
             Zatwierdź
           </Button>

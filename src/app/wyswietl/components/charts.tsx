@@ -1,87 +1,145 @@
 import { DataAfterCalculation } from "@/types/types";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer,
+  Line,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Brush,
+  ReferenceArea,
+  LineChart,
 } from "recharts";
+import { useState } from "react";
+
+const Checkboxs = () => {
+  const [selectedValue, setSelectedValue] = useState("BCI");
+
+  // console.log(selectedValue);
+  // const handleSelectionChange = (
+  //   event: React.ChangeEvent<HTMLInputElement>
+  // ) => {
+  //   setSelectedValue(event.target.value);
+  // };
+
+  return (
+    <div className="h-fit">
+      <RadioGroup defaultValue={selectedValue}>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem
+            value="BCI"
+            id="BCI"
+            checked={selectedValue === "BCI"}
+            onChange={(e) => setSelectedValue(e.target.value)}
+          />
+          <Label htmlFor="BCI">BCI</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem
+            value="BDI"
+            id="BDI"
+            checked={selectedValue === "BDI"}
+            onChange={(e) => setSelectedValue(e.target.value)}
+          />
+          <Label htmlFor="BDI">BDI</Label>
+        </div>
+        <div className="flex items-center space-x-2">
+          <RadioGroupItem
+            value="SCI"
+            id="SCI"
+            checked={selectedValue === "SCI"}
+            onChange={(e) => setSelectedValue(e.target.value)}
+          />
+          <Label htmlFor="SCI">SCI</Label>
+        </div>
+      </RadioGroup>
+    </div>
+  );
+};
 
 interface ChartsProps {
   selectedData: DataAfterCalculation[];
 }
 
 const Charts = ({ selectedData }: ChartsProps) => {
-  const selecteddata2 = selectedData.map(
-    (item, i) => item.data.sessions.geophoneX
-  );
+  const stations = selectedData[0].data.sessions.stations.map((station) => {
+    return {
+      stationID: station.stationID,
+      BCI: station.drops[0].BCI,
+      BDI: station.drops[0].BDI,
+      SCI: station.drops[0].SCI,
+      station: station.station,
+    };
+  });
 
-  function transformArray(data: typeof selecteddata2) {
-    const result = [];
-    for (let i = 0; i < data[0].length; i++) {
-      const obj: any = { name: data[0][i].name };
-
-      data.forEach((items, index) => {
-        obj[`road${index + 1}`] = items[i].value;
-      });
-
-      result.push(obj);
-    }
-
-    return result;
-  }
+  const stationStartIndex = 0;
+  const stationEndIndex = stations.length - 1;
 
   return (
-    <div className="max-w-screen-sm w-full h-[20rem]">
-      <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={transformArray(selecteddata2)}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip />
+    <div className="flex gap-10 justify-between">
+      {/* <Checkboxs /> */}
+      <div>
+        <LineChart width={800} height={600} data={stations}>
+          <XAxis dataKey="station" />
+          <YAxis domain={[0, 300]} />
+          <Tooltip label={"test"} />
           <Legend />
-          {Object.values(transformArray(selecteddata2)[0]).map((_, i) => {
-            return (
-              <Line
-                key={i}
-                type="monotone"
-                dataKey={`road${i + 1}`}
-                stroke={i === 0 ? "#82ca9d" : "#FF0000"}
-                strokeWidth={2}
-                activeDot={{ r: 8 }}
-                name={`road${i + 1}`}
-              />
-            );
-          })}
+          <CartesianGrid stroke="#f5f5f5" />
+          <Line dataKey="SCI" stroke="#ff7300" strokeWidth={1.5} />
+          <Line dataKey="BDI" stroke="#8884d8" strokeWidth={1.5} />
+          <Line dataKey="BCI" stroke="#ff00FF" strokeWidth={2} />
+          <ReferenceArea
+            y1={0}
+            y2={120}
+            label="Nie wymaga remontu"
+            fill="#90EE90"
+            fillOpacity={0.2}
+            onMouseEnter={() => {
+              console.log("enter");
+            }}
+          />
+          <ReferenceArea
+            y1={120}
+            y2={160}
+            fill="#006400"
+            fillOpacity={0.2}
+            label="Faza początkowa degradacji"
+          />
+          <ReferenceArea
+            y1={160}
+            y2={200}
+            fill="#F49000"
+            label="stan ostrzegawczy"
+            fillOpacity={0.2}
+          />
+          <ReferenceArea
+            y1={200}
+            y2={240}
+            fill="#F44340"
+            label="stan ostrzegawczy"
+            fillOpacity={0.2}
+          />
+
+          <ReferenceArea
+            y1={240}
+            stroke="#F5093C"
+            strokeOpacity={0.2}
+            fill="#F5093C"
+            label="Stan zły"
+          />
+
+          <Brush
+            startIndex={stationStartIndex}
+            endIndex={stationEndIndex}
+            dataKey="stationID"
+          />
         </LineChart>
-      </ResponsiveContainer>
+      </div>
     </div>
   );
 };
 
 export default Charts;
-
-// Data should be transformed as this
-// const testValues = [
-//   {
-//     name: "X1",
-//     road1: 0,
-//     road2: 0,
-//     road3: 0,
-//   },
-//   {
-//     name: "X2",
-//     road1: 100,
-//     road2: 140,
-//     road3: 120,
-//   },
-//   {
-//     name: "X3",
-//     road1: 300,
-//     road2: 240,
-//     road3: 250,
-//   },
-// ];
