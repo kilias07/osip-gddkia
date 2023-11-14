@@ -13,7 +13,7 @@ import {
   ReferenceArea,
   LineChart,
 } from "recharts";
-import { useState } from "react";
+import { use, useEffect, useState } from "react";
 
 const Checkboxs = () => {
   const [selectedValue, setSelectedValue] = useState("BCI");
@@ -33,7 +33,6 @@ const Checkboxs = () => {
             value="BCI"
             id="BCI"
             checked={selectedValue === "BCI"}
-            onChange={(e) => setSelectedValue(e.target.value)}
           />
           <Label htmlFor="BCI">BCI</Label>
         </div>
@@ -42,7 +41,6 @@ const Checkboxs = () => {
             value="BDI"
             id="BDI"
             checked={selectedValue === "BDI"}
-            onChange={(e) => setSelectedValue(e.target.value)}
           />
           <Label htmlFor="BDI">BDI</Label>
         </div>
@@ -51,7 +49,6 @@ const Checkboxs = () => {
             value="SCI"
             id="SCI"
             checked={selectedValue === "SCI"}
-            onChange={(e) => setSelectedValue(e.target.value)}
           />
           <Label htmlFor="SCI">SCI</Label>
         </div>

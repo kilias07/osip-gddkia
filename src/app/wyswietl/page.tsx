@@ -2,13 +2,11 @@
 
 import { useData } from "@/lib/store-zustand";
 import useStore from "@/lib/use-store";
-import Charts from "./components/charts";
 import { useEffect, useMemo, useState } from "react";
 import { DataTableShow } from "./components/data-table-show";
 import { DataAfterCalculation } from "@/types/types";
 import { columnsShow } from "./components/columns";
 import dynamic from "next/dynamic";
-import TestChart from "../dodaj/components/test-chart";
 import NewCharts from "./components/new-charts";
 
 const Map = dynamic(() => import("./components/map"), {

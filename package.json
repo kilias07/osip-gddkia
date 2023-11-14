@@ -26,7 +26,7 @@
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "lucide-react": "^0.279.0",
     "mdb-reader": "^2.2.6",
-    "next": "^14.0.0",
+    "next": "^14.0.2",
     "next-themes": "^0.2.1",
     "react": "latest",
     "react-apexcharts": "^1.4.1",

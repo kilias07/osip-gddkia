@@ -1,6 +1,10 @@
+"use client";
 import { DataAfterCalculation } from "@/types/types";
-import ReactApexChart from "react-apexcharts";
-import Chart from "react-apexcharts";
+import dynamic from "next/dynamic";
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
 
 interface ChartsProps {
   selectedData: DataAfterCalculation[];
@@ -134,6 +138,7 @@ const NewCharts = ({ selectedData }: ChartsProps) => {
         options={options}
         type="line"
         height={600}
+        width={1000}
         series={series}
       />
       <ReactApexChart
@@ -141,6 +146,7 @@ const NewCharts = ({ selectedData }: ChartsProps) => {
         options={options2}
         type="bar"
         height={140}
+        width={1000}
         series={series}
       />
     </div>
