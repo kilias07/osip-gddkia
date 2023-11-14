@@ -1,4 +1,3 @@
-import { DataAfterCalculation } from "@/types/types";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
@@ -13,7 +12,8 @@ import {
   ReferenceArea,
   LineChart,
 } from "recharts";
-import { use, useEffect, useState } from "react";
+import { useContext, useState } from "react";
+import { DataContext } from "./context-data";
 
 const Checkboxs = () => {
   const [selectedValue, setSelectedValue] = useState("BCI");
@@ -57,12 +57,9 @@ const Checkboxs = () => {
   );
 };
 
-interface ChartsProps {
-  selectedData: DataAfterCalculation[];
-}
-
-const Charts = ({ selectedData }: ChartsProps) => {
-  const stations = selectedData[0].data.sessions.stations.map((station) => {
+const Charts = () => {
+  const data = useContext(DataContext);
+  const stations = data[0].data.sessions.stations.map((station) => {
     return {
       stationID: station.stationID,
       BCI: station.drops[0].BCI,
