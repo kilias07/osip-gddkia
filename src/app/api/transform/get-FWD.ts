@@ -85,7 +85,13 @@ function getStations(
       const stationLine = stationsRawArray[i]
         .split(" ")
         .filter((x) => x !== "");
-      const [, long, , lat] = stationsRawArray[i - 1].split(" ");
+      let long = undefined;
+      let lat = undefined;
+
+      if (stationsRawArray[i - 1]?.includes("G0000000")) {
+        long = +stationsRawArray[i - 1].split(" ")[1];
+        lat = +stationsRawArray[i - 1].split(" ")[3];
+      }
 
       const minutes = Number(stationLine[stationLine.length - 1].slice(3));
       const hours = Number(stationLine[stationLine.length - 1].slice(1, 3));
@@ -101,8 +107,8 @@ function getStations(
         airTemp,
         time: new Date(date.setHours(hours, minutes)).toString(),
         GPS: {
-          long: +long,
-          lat: +lat,
+          long: long,
+          lat: lat,
         },
         drops: [],
       });

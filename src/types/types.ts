@@ -23,8 +23,8 @@ export interface Stations {
   airTemp: number | null;
   time: string;
   GPS: {
-    long: number;
-    lat: number;
+    long: number | undefined;
+    lat: number | undefined;
   };
   drops: Drops[];
 }
