@@ -18,13 +18,6 @@ import { DataContext } from "./context-data";
 const Checkboxs = () => {
   const [selectedValue, setSelectedValue] = useState("BCI");
 
-  // console.log(selectedValue);
-  // const handleSelectionChange = (
-  //   event: React.ChangeEvent<HTMLInputElement>
-  // ) => {
-  //   setSelectedValue(event.target.value);
-  // };
-
   return (
     <div className="h-fit">
       <RadioGroup defaultValue={selectedValue}>

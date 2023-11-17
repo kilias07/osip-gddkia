@@ -2,7 +2,7 @@
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 import { DataContext } from "./context-data";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -10,14 +10,17 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 const ChartSCI = () => {
   const data = useContext(DataContext);
-  const stations = data[0].data.sessions.stations.map((station) => {
-    return {
-      stationID: station.stationID,
-      SCI: station.drops[0].SCI,
-      station: station.station,
-    };
-  });
-
+  const stations = useMemo(
+    () =>
+      data[0].data.sessions.stations.map((station) => {
+        return {
+          stationID: station.stationID,
+          SCI: station.drops[0].SCI,
+          station: station.station,
+        };
+      }),
+    [data]
+  );
   const series = [
     {
       name: "SCI",
@@ -57,37 +60,48 @@ const ChartSCI = () => {
     annotations: {
       yaxis: [
         {
+          borderWidth: 0,
           y: 0,
           y2: 120,
           opacity: 0.5,
           fillColor: "#00ff00",
+          strokeDashArray: 0,
+          borderColor: "#00ff00",
         },
         {
+          borderWidth: 0,
           y: 120,
           y2: 160,
           opacity: 0.5,
-
+          strokeDashArray: 0,
           fillColor: "#006600",
+          borderColor: "#006600",
         },
         {
+          borderWidth: 0,
+          strokeDashArray: 0,
           y: 160,
           opacity: 0.5,
-
           y2: 200,
           fillColor: "#ff9900",
+          borderColor: "#ff9900",
         },
         {
+          borderWidth: 0,
+          strokeDashArray: 0,
           y: 200,
           y2: 240,
           opacity: 0.5,
-
           fillColor: "#cc3300",
+          borderColor: "#cc3300",
         },
         {
+          strokeDashArray: 0,
+          borderColor: "#ff0000",
+          borderWidth: 0,
           y: 240,
           y2: 260,
           opacity: 0.5,
-
           fillColor: "#ff0000",
         },
       ],
@@ -126,8 +140,8 @@ const ChartSCI = () => {
           opacity: 0.6,
         },
         xaxis: {
-          min: stations[0].station + 0.5,
-          max: stations[stations.length - 1].station - 0.5,
+          min: stations[0].station - 0.1,
+          max: stations[stations.length - 1].station + 0.1,
         },
       },
     },
@@ -171,7 +185,6 @@ const ChartSCI = () => {
           height={140}
           width="100%"
           series={series}
-          animation={false}
         />
       </div>
     </Card>

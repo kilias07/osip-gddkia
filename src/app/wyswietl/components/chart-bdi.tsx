@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 import { DataContext } from "./context-data";
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -15,13 +15,17 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), {
 
 const ChartBDI = () => {
   const data = useContext(DataContext);
-  const stations = data[0].data.sessions.stations.map((station) => {
-    return {
-      stationID: station.stationID,
-      BDI: station.drops[0].BDI,
-      station: station.station,
-    };
-  });
+  const stations = useMemo(
+    () =>
+      data[0].data.sessions.stations.map((station) => {
+        return {
+          stationID: station.stationID,
+          BDI: station.drops[0].BDI,
+          station: station.station,
+        };
+      }),
+    [data]
+  );
 
   const series = [
     {
@@ -65,30 +69,45 @@ const ChartBDI = () => {
           y2: 90,
           opacity: 0.5,
           fillColor: "#00ff00",
+          borderWidth: 0,
+          borderColor: "#00ff00",
+          strokeDashArray: 0,
         },
         {
           y: 90,
           y2: 120,
           opacity: 0.5,
           fillColor: "#006600",
+          borderWidth: 0,
+          borderColor: "#006600",
+          strokeDashArray: 0,
         },
         {
           y: 120,
           y2: 150,
           opacity: 0.5,
           fillColor: "#ff9900",
+          borderWidth: 0,
+          borderColor: "#ff9900",
+          strokeDashArray: 0,
         },
         {
           y: 150,
           y2: 180,
           opacity: 0.5,
           fillColor: "#cc3300",
+          borderWidth: 0,
+          borderColor: "#cc3300",
+          strokeDashArray: 0,
         },
         {
           y: 180,
           y2: 210,
           opacity: 0.5,
           fillColor: "#ff0000",
+          borderWidth: 0,
+          borderColor: "#ff0000",
+          strokeDashArray: 0,
         },
       ],
     },
@@ -126,8 +145,8 @@ const ChartBDI = () => {
           opacity: 0.6,
         },
         xaxis: {
-          min: stations[0].station + 0.5,
-          max: stations[stations.length - 1].station - 0.5,
+          min: stations[0].station - 0.1,
+          max: stations[stations.length - 1].station + 0.1,
         },
       },
     },
@@ -171,7 +190,6 @@ const ChartBDI = () => {
           height={140}
           width="100%"
           series={series}
-          animation={false}
         />
       </div>
     </Card>

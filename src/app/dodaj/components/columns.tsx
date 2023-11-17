@@ -4,17 +4,17 @@ import { ColumnDef } from "@tanstack/react-table";
 import { DataAfterCalculation } from "@/types/types";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useData } from "@/lib/store-zustand";
 
 function formatDate(date = new Date()) {
   const year = date.toLocaleString("default", { year: "numeric" });
@@ -114,6 +114,8 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const roadTesting = row.original;
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { deleteData } = useData((state) => state);
 
       return (
         <DropdownMenu>
@@ -124,15 +126,30 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuLabel>Akcje</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(roadTesting.data.id)}
+              onClick={() => {
+                const copyData = {
+                  roadNumber: roadTesting.userInput.roadNumber,
+                  roadwayNumber: roadTesting.userInput.roadwayNumber,
+                  laneNumber: roadTesting.userInput.laneNumber,
+                  type: roadTesting.userInput.type === "asc" ? "r" : "m",
+                  dob: formatDate(new Date(roadTesting.userInput.dob)),
+                };
+
+                const data = Object.values(copyData).join("_");
+                return navigator.clipboard.writeText(data);
+              }}
             >
-              Copy payment ID
+              Kopiuj nazwę do schowka
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>View customer</DropdownMenuItem>
-            <DropdownMenuItem>View payment details</DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-red-500 focus:text-red-500"
+              onClick={() => deleteData(roadTesting.data.id)}
+            >
+              Usuń
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

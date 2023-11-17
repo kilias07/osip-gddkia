@@ -7,15 +7,15 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../components/ui/form";
+} from "@/components/ui/form";
 import { TransformedData } from "./upload-file";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { Input } from "../../../components/ui/input";
-import { Button } from "../../../components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { DateInput } from "../../../components/ui/date-input";
+import { DateInput } from "@/components/ui/date-input";
 import { toast } from "sonner";
 import { DataAfterCalculation } from "@/types/types";
 import { useData } from "@/lib/store-zustand";
@@ -51,7 +51,6 @@ const FormFileData = ({
 }: FormFileDataProps) => {
   const { setData } = useData((state) => state);
 
-  const numberOfKm = fileData?.name.split(" ")[0];
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {

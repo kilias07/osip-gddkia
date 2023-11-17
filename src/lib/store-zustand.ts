@@ -3,18 +3,18 @@ import { UUID } from "crypto";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-type Store = {
+type DataStore = {
   allData: DataAfterCalculation[];
 };
 
-type Actions = {
+type DataActions = {
   setData: (data: DataAfterCalculation) => void;
   getData: (id: UUID) => DataAfterCalculation | undefined;
   deleteAllData: () => void;
   deleteData: (id: UUID) => void;
 };
 
-export const useData = create<Store & Actions>()(
+export const useData = create<DataStore & DataActions>()(
   persist(
     (set, get) => ({
       allData: [],
@@ -55,3 +55,24 @@ export const useData = create<Store & Actions>()(
     }
   )
 );
+
+const COLORS = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#00ffff"] as const;
+
+type ColorStore = {
+  color: string;
+  colors: (typeof COLORS)[number][];
+};
+type ColorActions = {
+  setColor: (color: string) => void;
+  // setColors: (colors: (typeof COLORS)[number][]) => void;
+};
+
+export const useColor = create<ColorStore & ColorActions>((set) => ({
+  color: "#ff0000",
+  colors: ["#00ff00", "#0000ff", "#ffff00", "#00ffff"],
+  setColor: (color) =>
+    set((newColor) => ({
+      color: newColor.color,
+      // colors: [...colors],
+    })),
+}));
