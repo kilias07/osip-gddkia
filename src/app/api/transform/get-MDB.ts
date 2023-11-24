@@ -44,9 +44,9 @@ export const getMDBData = async (data: IncomingData) => {
 
     return {
       date: String(sessions.Date),
-      length: (Number(sessions.StationMax) - Number(sessions.StationMin))
-        .toFixed(2)
-        .toString(),
+      length: (
+        Number(sessions.StationMax) - Number(sessions.StationMin)
+      ).toFixed(2),
       stationMinMax: {
         min: Number((sessions.StationMin as number)?.toFixed(2)),
         max: Number((sessions.StationMax as number)?.toFixed(2)),
@@ -62,13 +62,13 @@ export const getMDBData = async (data: IncomingData) => {
       .getTable("Stations")
       .getData()
       .map((station) => {
-        asphalftTemp = +(station.AsphaltTemperature as number).toFixed(3);
+        asphalftTemp = +(station.AsphaltTemperature as number)?.toFixed(3);
         return {
           stationID: station.StationID,
-          station: +(station.Station as number).toFixed(3),
+          station: +(station.Station as number)?.toFixed(3),
           asphalftTemp,
-          surfaceTemp: +(station.SurfaceTemperature as number).toFixed(3),
-          airTemp: +(station.AirTemperature as number).toFixed(3),
+          surfaceTemp: +(station.SurfaceTemperature as number)?.toFixed(3),
+          airTemp: +(station.AirTemperature as number)?.toFixed(3),
           time: station.Time,
           GPS: {
             long: station.Longitude,
@@ -104,9 +104,9 @@ export const getMDBData = async (data: IncomingData) => {
           };
         });
 
-        const stress = drop.Stress && +(drop.Stress as number).toFixed(2);
+        const stress = +(drop.Stress as number)?.toFixed(2);
 
-        const force = +(drop.Force as number).toFixed(2);
+        const force = +(drop.Force as number)?.toFixed(2);
 
         return {
           force,
@@ -119,7 +119,6 @@ export const getMDBData = async (data: IncomingData) => {
       });
     return data;
   }
-
   const params = {
     id: randomUUID(),
     sessions: getSessions(reader),

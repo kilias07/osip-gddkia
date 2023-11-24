@@ -23,11 +23,14 @@ const Navbar = () => {
         <div className="relative z-50">
           <Link
             href="/"
-            className="inline-block text-5xl uppercase font-medium"
+            className="inline-block text-4xl uppercase font-medium"
             as="/"
           >
-            osad
-            <span className="-ml-1 text-xs font-light">GDDKiA</span>
+            osad fwd
+            <span className="text-xs font-light">GDDKiA</span>
+            <p className="text-xs font-light lowercase">
+              Obsługa Systemu Akwizycji Danych FWD
+            </p>
           </Link>
         </div>
         <div className="md:hidden grow text-right mr-4">
@@ -49,7 +52,7 @@ const Navbar = () => {
             )}`}
           >
             <Link href="/wyswietl" onClick={handleClick}>
-              wyświetl wyniki
+              tryb wizualizacji
             </Link>
           </li>
           <li
@@ -61,7 +64,7 @@ const Navbar = () => {
             )}`}
           >
             <Link href="/dodaj" onClick={handleClick}>
-              dodaj wyniki
+              tryb dodawania plików
             </Link>
           </li>
         </ul>

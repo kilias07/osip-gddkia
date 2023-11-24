@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -14,17 +15,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useData } from "@/lib/store-zustand";
-
-function formatDate(date = new Date()) {
-  const year = date.toLocaleString("default", { year: "numeric" });
-  const month = date.toLocaleString("default", {
-    month: "2-digit",
-  });
-  const day = date.toLocaleString("default", { day: "2-digit" });
-
-  return [year, month, day].join("-");
-}
+import { useData, useFilteredRow } from "@/lib/store-zustand";
+import { format } from "date-fns";
 
 export const columns: ColumnDef<DataAfterCalculation>[] = [
   {
@@ -110,12 +102,54 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
     },
   },
   {
+    accessorKey: "name",
+    header: "Nazwa",
+    id: "name",
+    cell: ({ row }) => {
+      const roadTesting = row.original;
+      const { getData } = useData((state) => state);
+      const road = getData(row.original.data.id);
+      const timeMeasurement =
+        road &&
+        format(
+          new Date(road?.data.sessions.stations[0].time!),
+          "yyyyMMdd_HHmm"
+        );
+      const ext = road?.file.name.split(".").pop();
+
+      const copyData = {
+        roadNumber: roadTesting.userInput.roadNumber,
+        roadwayNumber: roadTesting.userInput.roadwayNumber,
+        laneNumber: roadTesting.userInput.laneNumber,
+        type: roadTesting.userInput.type === "asc" ? "r" : "m",
+        dob: timeMeasurement,
+      };
+
+      const data = Object.values(copyData).join("_") + "." + ext?.toLowerCase();
+      return <div className="lowercase">{data}</div>;
+    },
+  },
+  {
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
       const roadTesting = row.original;
-      // eslint-disable-next-line react-hooks/rules-of-hooks
+
       const { deleteData } = useData((state) => state);
+      const { deleteRowSelection } = useFilteredRow((state) => state);
+
+      const roadTime = row.original.data.sessions.stations[0].time;
+      const roadOriginalName = row.original.file.name;
+      const timeMeasurement =
+        roadTime && format(new Date(roadTime), "yyyyMMdd_HHmm");
+      const ext = roadOriginalName.split(".").pop();
+      const dataForName = {
+        roadNumber: roadTesting.userInput.roadNumber,
+        roadwayNumber: roadTesting.userInput.roadwayNumber,
+        laneNumber: roadTesting.userInput.laneNumber,
+        type: roadTesting.userInput.type === "asc" ? "r" : "m",
+        dob: timeMeasurement,
+      };
 
       return (
         <DropdownMenu>
@@ -128,25 +162,32 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Akcje</DropdownMenuLabel>
             <DropdownMenuItem
+              className="flex-col items-start"
               onClick={() => {
-                const copyData = {
-                  roadNumber: roadTesting.userInput.roadNumber,
-                  roadwayNumber: roadTesting.userInput.roadwayNumber,
-                  laneNumber: roadTesting.userInput.laneNumber,
-                  type: roadTesting.userInput.type === "asc" ? "r" : "m",
-                  dob: formatDate(new Date(roadTesting.userInput.dob)),
-                };
-
-                const data = Object.values(copyData).join("_");
-                return navigator.clipboard.writeText(data);
+                const dataForNameAll =
+                  Object.values(dataForName).join("_") + "." + ext;
+                return navigator.clipboard.writeText(dataForNameAll);
               }}
             >
-              Kopiuj nazwę do schowka
+              <span>kopiuj plik z wygenerowaną</span>
+              <span>nazwą wraz z rozszerzeniem</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="flex-col items-start"
+              onClick={() =>
+                navigator.clipboard.writeText(roadTesting.file.name)
+              }
+            >
+              <span>kopiuj nazwę</span>
+              <span>pliku źródłowego</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-red-500 focus:text-red-500"
-              onClick={() => deleteData(roadTesting.data.id)}
+              onClick={() => {
+                deleteRowSelection(row.index);
+                deleteData(roadTesting.data.id);
+              }}
             >
               Usuń
             </DropdownMenuItem>

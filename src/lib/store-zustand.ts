@@ -1,4 +1,5 @@
 import { DataAfterCalculation } from "@/types/types";
+import { OnChangeFn, RowSelectionState } from "@tanstack/react-table";
 import { UUID } from "crypto";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
@@ -18,7 +19,6 @@ export const useData = create<DataStore & DataActions>()(
   persist(
     (set, get) => ({
       allData: [],
-
       setData: (data) => {
         if (
           get().allData.length > 0 &&
@@ -56,23 +56,54 @@ export const useData = create<DataStore & DataActions>()(
   )
 );
 
-const COLORS = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#00ffff"] as const;
-
-type ColorStore = {
-  color: string;
-  colors: (typeof COLORS)[number][];
+type FilteredStore = {
+  rowSelection: { [val: number]: boolean };
 };
-type ColorActions = {
-  setColor: (color: string) => void;
-  // setColors: (colors: (typeof COLORS)[number][]) => void;
+type FilteredActions = {
+  rowSelection: {};
+  setRowSelecton: OnChangeFn<RowSelectionState>;
+  deleteRowSelection: (i: number) => void;
 };
 
-export const useColor = create<ColorStore & ColorActions>((set) => ({
-  color: "#ff0000",
-  colors: ["#00ff00", "#0000ff", "#ffff00", "#00ffff"],
-  setColor: (color) =>
-    set((newColor) => ({
-      color: newColor.color,
-      // colors: [...colors],
-    })),
+export const useFilteredRow = create<FilteredStore & FilteredActions>(
+  (set) => ({
+    rowSelection: {},
+    //@ts-ignore add types for zustand
+    setRowSelecton: (fn: (prev: PrevState) => PrevState) => {
+      return set((state) => ({ rowSelection: fn(state.rowSelection) }));
+    },
+    deleteRowSelection: (i) => {
+      set((state) => {
+        if (state.rowSelection[i]) {
+          delete state.rowSelection[i];
+        }
+        return { rowSelection: state.rowSelection };
+      });
+    },
+  })
+);
+
+export const useShowWisualization = create<{
+  showChart: boolean;
+  setShowChart: (showChart: boolean) => void;
+}>((set) => ({
+  showChart: false,
+  setShowChart: (showChart) => set({ showChart }),
+}));
+
+export interface ChartData {
+  chartsData:
+    | {
+        [x: string]: string | number;
+        name: string;
+        station: number;
+      }[]
+    | [];
+}
+export const useChartsData = create<{
+  chartsData: ChartData["chartsData"];
+  setChartsData: (chartsData: ChartData["chartsData"]) => void;
+}>((set) => ({
+  chartsData: [],
+  setChartsData: (chartsData) => set({ chartsData }),
 }));

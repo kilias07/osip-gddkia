@@ -30,22 +30,24 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { memo, useMemo, useState } from "react";
 import Link from "next/link";
+import { useFilteredRow } from "@/lib/store-zustand";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
 }
 
-export function DataTable<TData, TValue>({
+const DataTable = <TData, TValue>({
   columns,
   data,
-}: DataTableProps<TData, TValue>) {
+}: DataTableProps<TData, TValue>) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-  const [rowSelection, setRowSelection] = useState({});
+  const rowSelection = useFilteredRow((state) => state.rowSelection);
+  const setRowSelection = useFilteredRow((state) => state.setRowSelecton);
 
   const table = useReactTable({
     data,
@@ -58,6 +60,7 @@ export function DataTable<TData, TValue>({
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     state: {
       sorting,
       columnFilters,
@@ -65,6 +68,7 @@ export function DataTable<TData, TValue>({
       rowSelection,
     },
   });
+
   return (
     <div className="w-max-[1200px]">
       <div className="flex items-center py-4">
@@ -104,7 +108,10 @@ export function DataTable<TData, TValue>({
                     nameOfCol = "Typ";
                     break;
                   case "dob":
-                    nameOfCol = "Dob";
+                    nameOfCol = "Data";
+                    break;
+                  case "name":
+                    nameOfCol = "Nazwa";
                     break;
                 }
                 return (
@@ -204,4 +211,6 @@ export function DataTable<TData, TValue>({
       </div>
     </div>
   );
-}
+};
+
+export { DataTable };

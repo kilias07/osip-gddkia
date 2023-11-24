@@ -1,192 +1,177 @@
 "use client";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import dynamic from "next/dynamic";
-import { DataContext } from "./context-data";
-import { useContext, useMemo } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Brush,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ReferenceArea,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import CustomizedDot from "./custom-dot";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
+import { ChartData } from "@/lib/store-zustand";
 
-const ReactApexChart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-});
-
-const ChartSCI = () => {
-  const data = useContext(DataContext);
-  const stations = useMemo(
-    () =>
-      data[0].data.sessions.stations.map((station) => {
-        return {
-          stationID: station.stationID,
-          SCI: station.drops[0].SCI,
-          station: station.station,
-        };
-      }),
-    [data]
+const ChartSCI = ({ chartsData }: ChartData) => {
+  const uniqueStations = useMemo(
+    () => [...new Set(chartsData.map((data) => data.name))],
+    [chartsData]
   );
-  const series = [
-    {
-      name: "SCI",
-      data: stations.map((station) => station.SCI),
-    },
-  ];
 
-  const options: ApexCharts.ApexOptions = {
-    chart: {
-      id: "sci-chart",
-      animations: {
-        enabled: false,
-      },
+  const [showReference, setShowReference] = useState(false);
+  const { theme } = useTheme();
 
-      toolbar: {
-        tools: {
-          pan: false,
-          reset: false,
-        },
-      },
-    },
-    xaxis: {
-      type: "numeric",
-      categories: stations.map((station) => station.station),
-      title: {
-        text: "Kilometraż",
-      },
-    },
-    yaxis: {
-      min: 0,
-      max: 250,
-      seriesName: "SCI",
-      title: {
-        text: "SCI",
-      },
-    },
-    annotations: {
-      yaxis: [
-        {
-          borderWidth: 0,
-          y: 0,
-          y2: 120,
-          opacity: 0.5,
-          fillColor: "#00ff00",
-          strokeDashArray: 0,
-          borderColor: "#00ff00",
-        },
-        {
-          borderWidth: 0,
-          y: 120,
-          y2: 160,
-          opacity: 0.5,
-          strokeDashArray: 0,
-          fillColor: "#006600",
-          borderColor: "#006600",
-        },
-        {
-          borderWidth: 0,
-          strokeDashArray: 0,
-          y: 160,
-          opacity: 0.5,
-          y2: 200,
-          fillColor: "#ff9900",
-          borderColor: "#ff9900",
-        },
-        {
-          borderWidth: 0,
-          strokeDashArray: 0,
-          y: 200,
-          y2: 240,
-          opacity: 0.5,
-          fillColor: "#cc3300",
-          borderColor: "#cc3300",
-        },
-        {
-          strokeDashArray: 0,
-          borderColor: "#ff0000",
-          borderWidth: 0,
-          y: 240,
-          y2: 260,
-          opacity: 0.5,
-          fillColor: "#ff0000",
-        },
-      ],
-    },
-    stroke: {
-      curve: "straight",
-      width: 2,
-      colors: ["#000"],
-    },
-    markers: {
-      size: 2,
-      colors: ["#fff"],
-      strokeColors: ["#000"],
-    },
+  const handleClick = () => {
+    setShowReference((prev) => !prev);
   };
-
-  const brushOptions: ApexCharts.ApexOptions = {
-    colors: ["#000"],
-    chart: {
-      id: "sci-chart2",
-      height: 140,
-      type: "bar",
-      foreColor: "#ccc",
-      brush: {
-        target: "sci-chart",
-        enabled: true,
-      },
-      animations: {
-        enabled: false,
-      },
-      selection: {
-        enabled: true,
-
-        fill: {
-          color: "#fff",
-          opacity: 0.6,
-        },
-        xaxis: {
-          min: stations[0].station - 0.1,
-          max: stations[stations.length - 1].station + 0.1,
-        },
-      },
-    },
-    xaxis: {
-      type: "numeric",
-      categories: stations.map((station) => station.station),
-      min: stations[0].station - 0.1,
-      max: stations[stations.length - 1].station + 0.1,
-      title: {
-        text: "Kilometraż",
-      },
-    },
-    yaxis: {
-      min: 0,
-      max: 260,
-      tickAmount: 4,
-      seriesName: "SCI",
-      title: {
-        text: "SCI",
-      },
-    },
-  };
-
+  const LineChartWithDot = useMemo(
+    () =>
+      uniqueStations.map((_, i) => (
+        <Line
+          key={"SCI" + i}
+          dataKey={"SCI" + i}
+          name={uniqueStations![i]}
+          stroke={`${theme === "dark" ? "white" : "black"}`}
+          dot={({ value, cx, cy }) => (
+            <CustomizedDot
+              key={value + "" + cx + "" + cy}
+              value={value}
+              cx={cx}
+              cy={cy}
+              range={[181, 151, 121, 91, 0]}
+            />
+          )}
+        />
+      )),
+    [uniqueStations, theme]
+  );
+  const LineChartWithoutDot = useMemo(
+    () =>
+      uniqueStations.map((_, i) => (
+        <Line
+          key={"SCI" + i}
+          dataKey={"SCI" + i}
+          name={uniqueStations![i]}
+          stroke={`${theme === "dark" ? "white" : "black"}`}
+        />
+      )),
+    [uniqueStations, theme]
+  );
   return (
-    <Card className="max-w-5xl px-3" key={"SCI"}>
-      <CardHeader className="pb-0">
-        <CardTitle>Współczynnik SCI</CardTitle>
-      </CardHeader>
-      <div>
-        <ReactApexChart
-          options={options}
-          type="line"
-          height={300}
-          width="100%"
-          series={series}
-        />
-        <ReactApexChart
-          style={{ marginTop: "-45px" }}
-          options={brushOptions}
-          type="bar"
-          height={140}
-          width="100%"
-          series={series}
-        />
-      </div>
+    <Card className="mt-4 pt-6" key={"BDI"}>
+      <CardContent className="flex flex-col md:flex-row">
+        <div className="w-full md:w-64">
+          <CardHeader className="pl-1">
+            <CardTitle>Pakiet warstw bitumicznych</CardTitle>
+            <CardDescription>SCI</CardDescription>
+          </CardHeader>
+          <CardDescription className="text-slate-950">
+            Referencja
+          </CardDescription>
+          <ul>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#00ff00] w-5 h-5 rounded-full inline-block" />
+              <p>0-120 dobry stan techniczny</p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#006600] w-5 h-5 rounded-full inline-block" />
+              <p>121 - 160 stan techniczny zadowalający</p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#ff9900] w-5 h-5 rounded-full inline-block" />
+              <p>161 - 200 stan ostrzegawczy</p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#cc3300] w-5 h-5 rounded-full inline-block" />
+              <p>201 - 240 stan zły </p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#ff0000] w-5 h-5 rounded-full inline-block" />
+              <p> {">"} 240 konieczny remont/przebudowa</p>
+            </li>
+          </ul>
+          <Button
+            onClick={handleClick}
+            variant={showReference ? "secondary" : "default"}
+            className="my-2"
+          >
+            {showReference ? "Ukryj Referencje" : "Pokaż Referencje"}
+          </Button>
+        </div>
+        <ResponsiveContainer width={"100%"} height={700}>
+          <LineChart data={chartsData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="station" />
+            <YAxis
+              type="number"
+              domain={[0, 300]}
+              ticks={[0, 50, 90, 120, 150, 180, 240, 300]}
+            />
+            <Tooltip />
+            <Legend
+              formatter={(value, entry, index) => {
+                const firstPartText = value.substring(0, 7);
+                const secondPartText = value.substring(8);
+
+                return (
+                  <div className="mx-1">
+                    <p className="text-black">{firstPartText}</p>
+                    <span className="text-black">{secondPartText}</span>
+                  </div>
+                );
+              }}
+            />
+            {showReference ? (
+              <>
+                <ReferenceArea
+                  y1={0}
+                  y2={90}
+                  fill="#00ff00"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={90}
+                  y2={120}
+                  fill="#006600"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={120}
+                  y2={150}
+                  fill="#ff9900"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={150}
+                  y2={180}
+                  fill="#cc3300"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={180}
+                  y2={300}
+                  fill="#ff0000"
+                  fillOpacity={0.5}
+                />
+              </>
+            ) : null}
+            {showReference ? LineChartWithoutDot : LineChartWithDot}
+            <Brush dataKey="station" stroke="black" />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
     </Card>
   );
 };

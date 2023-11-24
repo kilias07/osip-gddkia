@@ -47,7 +47,7 @@ function getSession(fileData: string): Sessions {
 
   return <Sessions>{
     date: date.toString(),
-    length: (+Number(endKM) - +Number(startKMTest)).toFixed(2).toString(),
+    length: (Math.abs(+endKM) - Math.abs(+startKMTest)).toFixed(2),
     stationMinMax: {
       min: +Number(startKMTest).toFixed(2),
       max: +Number(endKM).toFixed(2),

@@ -1,199 +1,185 @@
 "use client";
 import {
   Card,
+  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import dynamic from "next/dynamic";
-import { DataContext } from "./context-data";
-import { useContext, useMemo } from "react";
 
-const ReactApexChart = dynamic(() => import("react-apexcharts"), {
-  ssr: false,
-});
+import {
+  Brush,
+  CartesianGrid,
+  Legend,
+  Line,
+  LineChart,
+  ReferenceArea,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-const ChartBDI = () => {
-  const data = useContext(DataContext);
-  const stations = useMemo(
-    () =>
-      data[0].data.sessions.stations.map((station) => {
-        return {
-          stationID: station.stationID,
-          BDI: station.drops[0].BDI,
-          station: station.station,
-        };
-      }),
-    [data]
+import CustomizedDot from "./custom-dot";
+import { useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
+import { ChartData } from "@/lib/store-zustand";
+
+const ChartSCI = ({ chartsData }: ChartData) => {
+  const uniqueStations = useMemo(
+    () => [...new Set(chartsData.map((data) => data.name))],
+    [chartsData]
   );
 
-  const series = [
-    {
-      name: "BDI",
-      data: stations.map((station) => station.BDI),
-    },
-  ];
-
-  const options: ApexCharts.ApexOptions = {
-    chart: {
-      id: "bdi-chart",
-      animations: {
-        enabled: false,
-      },
-      toolbar: {
-        tools: {
-          pan: false,
-          reset: false,
-        },
-      },
-    },
-    xaxis: {
-      type: "numeric",
-      categories: stations.map((station) => station.station),
-      title: {
-        text: "Kilometraż",
-      },
-    },
-    yaxis: {
-      min: 0,
-      max: 210,
-      seriesName: "BDI",
-      title: {
-        text: "BDI",
-      },
-    },
-    annotations: {
-      yaxis: [
-        {
-          y: 0,
-          y2: 90,
-          opacity: 0.5,
-          fillColor: "#00ff00",
-          borderWidth: 0,
-          borderColor: "#00ff00",
-          strokeDashArray: 0,
-        },
-        {
-          y: 90,
-          y2: 120,
-          opacity: 0.5,
-          fillColor: "#006600",
-          borderWidth: 0,
-          borderColor: "#006600",
-          strokeDashArray: 0,
-        },
-        {
-          y: 120,
-          y2: 150,
-          opacity: 0.5,
-          fillColor: "#ff9900",
-          borderWidth: 0,
-          borderColor: "#ff9900",
-          strokeDashArray: 0,
-        },
-        {
-          y: 150,
-          y2: 180,
-          opacity: 0.5,
-          fillColor: "#cc3300",
-          borderWidth: 0,
-          borderColor: "#cc3300",
-          strokeDashArray: 0,
-        },
-        {
-          y: 180,
-          y2: 210,
-          opacity: 0.5,
-          fillColor: "#ff0000",
-          borderWidth: 0,
-          borderColor: "#ff0000",
-          strokeDashArray: 0,
-        },
-      ],
-    },
-    stroke: {
-      curve: "straight",
-      width: 2,
-      colors: ["#000"],
-    },
-    markers: {
-      size: 2,
-      colors: ["#fff"],
-      strokeColors: ["#000"],
-    },
+  const [showReference, setShowReference] = useState(false);
+  const handleClick = () => {
+    setShowReference((prev) => !prev);
   };
+  const { theme } = useTheme();
 
-  const brushOptions: ApexCharts.ApexOptions = {
-    colors: ["#000"],
-    chart: {
-      id: "bdi-chart2",
-      height: 140,
-      type: "bar",
-      foreColor: "#ccc",
-      brush: {
-        target: "bdi-chart",
-        enabled: true,
-      },
-      animations: {
-        enabled: false,
-      },
-      selection: {
-        enabled: true,
-
-        fill: {
-          color: "#fff",
-          opacity: 0.6,
-        },
-        xaxis: {
-          min: stations[0].station - 0.1,
-          max: stations[stations.length - 1].station + 0.1,
-        },
-      },
-    },
-    xaxis: {
-      type: "numeric",
-      categories: stations.map((station) => station.station),
-      min: stations[0].station - 0.1,
-      max: stations[stations.length - 1].station + 0.1,
-      title: {
-        text: "Kilometraż",
-      },
-    },
-    yaxis: {
-      min: 0,
-      max: 210,
-      tickAmount: 4,
-      seriesName: "BDI",
-      title: {
-        text: "BDI",
-      },
-    },
-  };
+  const LineChartWithDot = useMemo(
+    () =>
+      uniqueStations.map((_, i) => (
+        <Line
+          className="!stroke-white"
+          key={"BDI" + i}
+          dataKey={"BDI" + i}
+          name={uniqueStations![i]}
+          stroke={`${theme === "dark" ? "white" : "black"}`}
+          dot={({ value, cx, cy }) => (
+            <CustomizedDot
+              key={value + "" + cx + "" + cy}
+              value={value}
+              cx={cx}
+              cy={cy}
+              range={[240, 201, 161, 121, 0]}
+            />
+          )}
+        />
+      )),
+    [uniqueStations, theme]
+  );
+  const LineChartWithoutDot = useMemo(
+    () =>
+      uniqueStations.map((_, i) => (
+        <Line
+          key={"BDI" + i}
+          dataKey={"BDI" + i}
+          name={uniqueStations![i]}
+          stroke={`${theme === "dark" ? "white" : "black"}`}
+        />
+      )),
+    [uniqueStations, theme]
+  );
 
   return (
-    <Card className="max-w-5xl px-3" key={"BDI"}>
-      <CardHeader className="pb-0">
-        <CardTitle>Współczynnik BDI</CardTitle>
-      </CardHeader>
-      <div>
-        <ReactApexChart
-          options={options}
-          type="line"
-          height={300}
-          width="100%"
-          series={series}
-        />
-        <ReactApexChart
-          style={{ marginTop: "-45px" }}
-          options={brushOptions}
-          type="bar"
-          height={140}
-          width="100%"
-          series={series}
-        />
-      </div>
+    <Card className="mt-4 pt-6" key={"BDI"}>
+      <CardContent className="flex flex-col md:flex-row">
+        <div className="w-full md:w-64">
+          <CardHeader className="pl-1">
+            <CardTitle>Podbudowa</CardTitle>
+            <CardDescription>BDI</CardDescription>
+          </CardHeader>
+          <CardDescription className="text-slate-950">
+            Referencja
+          </CardDescription>
+
+          <ul>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#00ff00] w-5 h-5 rounded-full inline-block" />
+              <p>0-120 dobry stan techniczny</p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#006600] w-5 h-5 rounded-full inline-block" />
+              <p>121 - 160 stan techniczny zadowalający</p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#ff9900] w-5 h-5 rounded-full inline-block" />
+              <p>161 - 200 stan ostrzegawczy</p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#cc3300] w-5 h-5 rounded-full inline-block" />
+              <p>201 - 240 stan zły </p>
+            </li>
+            <li className="flex gap-2 items-center my-2 text-xs">
+              <span className="bg-[#ff0000] w-5 h-5 rounded-full inline-block" />
+              <p> {">"} 240 konieczny remont/przebudowa</p>
+            </li>
+          </ul>
+          <Button
+            onClick={handleClick}
+            variant={showReference ? "secondary" : "default"}
+            className="my-2"
+          >
+            {showReference ? "Ukryj Referencje" : "Pokaż Referencje"}
+          </Button>
+        </div>
+        <ResponsiveContainer width={"100%"} height={700}>
+          <LineChart data={chartsData}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="station" />
+            <YAxis
+              type="number"
+              domain={[0, 300]}
+              ticks={[0, 50, 90, 120, 150, 180, 240, 300]}
+            />
+            <Tooltip />
+            <Legend
+              formatter={(value, entry, index) => {
+                const firstPartText = value.substring(0, 7);
+                const secondPartText = value.substring(8);
+
+                return (
+                  <div className="mx-1">
+                    <p className="text-black">{firstPartText}</p>
+                    <span className="text-black">{secondPartText}</span>
+                  </div>
+                );
+              }}
+            />
+            {showReference ? (
+              <>
+                <ReferenceArea
+                  y1={0}
+                  y2={90}
+                  fill="#00ff00"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={90}
+                  y2={120}
+                  fill="#006600"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={120}
+                  y2={150}
+                  fill="#ff9900"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={150}
+                  y2={180}
+                  fill="#cc3300"
+                  fillOpacity={0.5}
+                />
+                <ReferenceArea
+                  y1={180}
+                  y2={300}
+                  fill="#ff0000"
+                  fillOpacity={0.5}
+                />
+              </>
+            ) : null}
+
+            {showReference ? LineChartWithoutDot : LineChartWithDot}
+            <Brush dataKey="station" stroke="black" />
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
     </Card>
   );
 };
 
-export default ChartBDI;
+export default ChartSCI;

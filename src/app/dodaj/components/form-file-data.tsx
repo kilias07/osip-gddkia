@@ -17,12 +17,12 @@ import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DateInput } from "@/components/ui/date-input";
 import { toast } from "sonner";
-import { DataAfterCalculation } from "@/types/types";
+import { DataAfterCalculation, Sessions } from "@/types/types";
 import { useData } from "@/lib/store-zustand";
 
 const formSchema = z.object({
   type: z.enum(["asc", "desc"], {
-    invalid_type_error: "Proszę wybrać kierunek drogi.",
+    invalid_type_error: "Proszę podać kilometraż.",
   }),
   roadNumber: z.string({
     required_error: "Numer drogi jest wymagany.",
@@ -51,10 +51,22 @@ const FormFileData = ({
 }: FormFileDataProps) => {
   const { setData } = useData((state) => state);
 
+  function getDirection(transformedData: TransformedData["message"]) {
+    const firstStation = transformedData.sessions.stations.find(
+      (station) => station.stationID === 1
+    )?.station!;
+    const lastStation = transformedData.sessions.stations.find(
+      (station) =>
+        station.stationID === transformedData.sessions.stations.length
+    )?.station!;
+    return firstStation - lastStation < 0 ? "asc" : "desc";
+  }
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       dob: new Date(transformedData.sessions.date),
+      type: getDirection(transformedData),
     },
   });
 
@@ -172,6 +184,7 @@ const FormFileData = ({
                       id="asc_desc"
                       {...form.register("type")}
                       className="flex pt-2"
+                      defaultValue={getDirection(transformedData)}
                     >
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>

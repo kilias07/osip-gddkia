@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { memo } from "react";
 
 const Legend = () => {
   return (
@@ -107,4 +108,4 @@ const Legend = () => {
   );
 };
 
-export default Legend;
+export default memo(Legend);
