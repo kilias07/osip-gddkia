@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChartData,
   useChartsData,
   useData,
   useFilteredRow,
@@ -12,24 +13,35 @@ import { DataTable } from "@/components/data-table";
 import ChartBDI from "./components/chart-bdi";
 import ChartSCI from "./components/chart-sci";
 import ChartBCI from "./components/chart-bci";
-import { DataForVisualisation } from "@/types/types";
 import avgOffDropsIndicator from "@/lib/helper";
-
 import format from "date-fns/format";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Button } from "@/components/ui/button";
+import ChartPicker from "./components/chart-picker";
+import ChartALL from "./components/chart-all";
+
+export interface Picker {
+  SCI: boolean;
+  BDI: boolean;
+  BCI: boolean;
+  ALL: boolean;
+}
 
 export default function ShowResults() {
   const allData = useStore(useData, (state) => state.allData)!;
   const { rowSelection } = useFilteredRow((state) => state);
-
-  const { chartsData, setChartsData } = useChartsData((state) => state);
-
+  const { setChartsData } = useChartsData((state) => state);
   const { showChart, setShowChart } = useShowWisualization((state) => state);
+  const [picked, setPicked] = useState<Picker>({
+    SCI: true,
+    BDI: true,
+    BCI: true,
+    ALL: false,
+  });
 
   const handleClick = useCallback(() => {
     const filteredData = Object.keys(rowSelection).map((key) => allData[+key]);
-    const chartsData = filteredData?.map((measure) => {
+    const chartsData = filteredData?.map((measure): ChartData => {
       const roadTime = measure.data.sessions.stations[0].time;
       const roadOriginalName = measure.file.name;
       const timeMeasurement =
@@ -42,51 +54,25 @@ export default function ShowResults() {
         type: measure.userInput.type === "asc" ? "r" : "m",
         dob: timeMeasurement,
       };
-      return {
-        id: measure.data.id,
-        date: measure.userInput.dob,
-        name: Object.values(dataForName).join("_") + "." + ext,
-        originalName: measure.file.name,
-        sessions: {
-          length: measure.data.sessions.length,
-          stationMinMax: measure.data.sessions.stationMinMax,
-          stations: measure.data.sessions.stations.map((station) => {
-            return {
-              id: station.stationID,
-              GPS: {
-                lat: station.GPS.lat,
-                long: station.GPS.long,
-              },
-              station: station.station,
-              indicator: avgOffDropsIndicator(station.drops),
-            };
-          }),
-        },
-      };
-    }) as DataForVisualisation[];
-
-    const data = () => {
-      const result = [];
-      chartsData?.sort((a, b) => {
-        return a.sessions.stations[0].station - b.sessions.stations[0].station;
+      return measure.data.sessions.stations.map((station) => {
+        const name = Object.values(dataForName).join("_") + "." + ext;
+        const { BCI, BDI, SCI } = avgOffDropsIndicator(station.drops);
+        return {
+          GPS: {
+            long: station.GPS.long,
+            lat: station.GPS.lat,
+          },
+          station: station.station,
+          SCI,
+          BDI,
+          BCI,
+          date: measure.userInput.dob,
+          name,
+          originalName: measure.file.name,
+        };
       });
-      for (let i = 0; i < chartsData!.length; i++) {
-        for (let j = 0; j < chartsData![i].sessions.stations.length; j++) {
-          result.push({
-            name: chartsData![i].name,
-            station: chartsData![i].sessions.stations[j].station,
-            ["BCI" + i]:
-              chartsData![i].sessions.stations[j].indicator.BCI.toFixed(2),
-            ["BDI" + i]:
-              chartsData![i].sessions.stations[j].indicator.BDI.toFixed(2),
-            ["SCI" + i]:
-              chartsData![i].sessions.stations[j].indicator.SCI.toFixed(2),
-          });
-        }
-      }
-      return result;
-    };
-    setChartsData(data());
+    });
+    setChartsData(chartsData);
 
     setShowChart(true);
   }, [rowSelection, allData, setShowChart, setChartsData]);
@@ -94,17 +80,31 @@ export default function ShowResults() {
   return (
     <div className="my-10">
       {allData && <DataTable data={allData} columns={columns} />}
-      <Button variant={"default"} onClick={handleClick} className="w-64 mr-4">
-        pokaż wizualizacje
-      </Button>
-      <Button variant={"outline"} onClick={() => setShowChart(false)}>
-        Schowaj
-      </Button>
+      {Object.keys(rowSelection).length === 0 ? null : (
+        <div className="flex gap-10">
+          <div>
+            <Button
+              variant={"default"}
+              onClick={handleClick}
+              className="w-64 mr-4"
+            >
+              pokaż wizualizacje
+            </Button>
+            <Button variant={"outline"} onClick={() => setShowChart(false)}>
+              Schowaj
+            </Button>
+          </div>
+          {showChart ? (
+            <ChartPicker picked={picked} setPicked={setPicked} />
+          ) : null}
+        </div>
+      )}
       {showChart ? (
         <>
-          <ChartBDI chartsData={chartsData} />
-          <ChartBCI chartsData={chartsData} />
-          <ChartSCI chartsData={chartsData} />
+          {picked.SCI ? <ChartSCI /> : null}
+          {picked.BDI ? <ChartBDI /> : null}
+          {picked.BCI ? <ChartBCI /> : null}
+          {picked.ALL ? <ChartALL /> : null}
         </>
       ) : null}
     </div>

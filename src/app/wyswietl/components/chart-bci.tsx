@@ -1,4 +1,3 @@
-"use client";
 import {
   Card,
   CardContent,
@@ -11,65 +10,62 @@ import {
   Brush,
   CartesianGrid,
   Legend,
-  Line,
-  LineChart,
   ReferenceArea,
   ResponsiveContainer,
+  Scatter,
+  ScatterChart,
   Tooltip,
   XAxis,
   YAxis,
 } from "recharts";
 
-import CustomizedDot from "./custom-dot";
-import { useMemo, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useMemo } from "react";
 import { useTheme } from "next-themes";
-import { ChartData } from "@/lib/store-zustand";
+import { useChartsData } from "@/lib/store-zustand";
+import { getShape } from "./chart-functions";
 
-const ChartBCI = ({ chartsData }: ChartData) => {
+const CustomReferenceArea = () => (
+  <>
+    <ReferenceArea y1={0} y2={45} fill="#00ff00" fillOpacity={0.5} />
+    <ReferenceArea y1={45} y2={60} fill="#006600" fillOpacity={0.5} />
+    <ReferenceArea y1={60} y2={75} fill="#ff9900" fillOpacity={0.5} />
+    <ReferenceArea y1={75} y2={90} fill="#cc3300" fillOpacity={0.5} />
+    <ReferenceArea y1={90} y2={300} fill="#ff0000" fillOpacity={0.5} />
+  </>
+);
+
+const ChartBCI = () => {
+  const { chartsData } = useChartsData((state) => state);
   const uniqueStations = useMemo(
-    () => [...new Set(chartsData.map((data) => data.name))],
+    () => [...new Set(chartsData.flat().map((data) => data.name))],
     [chartsData]
   );
-  const [showReference, setShowReference] = useState(false);
-  const handleClick = () => {
-    setShowReference((prev) => !prev);
-  };
+
   const { theme } = useTheme();
 
-  const LineChartWithDot = useMemo(
-    () =>
-      uniqueStations.map((_, i) => (
-        <Line
-          key={"BCI" + i}
-          dataKey={"BCI" + i}
-          name={uniqueStations![i]}
-          stroke={`${theme === "dark" ? "white" : "black"}`}
-          dot={({ value, cx, cy }) => (
-            <CustomizedDot
-              key={value + "" + cx + "" + cy}
-              value={value}
-              cx={cx}
-              cy={cy}
-              range={[90, 76, 61, 46, 0]}
-            />
-          )}
-        />
-      )),
-    [uniqueStations, theme]
-  );
-  const LineChartWithoutDot = useMemo(
-    () =>
-      uniqueStations.map((_, i) => (
-        <Line
-          key={"BCI" + i}
-          dataKey={"BCI" + i}
-          name={uniqueStations![i]}
-          stroke={`${theme === "dark" ? "white" : "black"}`}
-          dot
-        />
-      )),
-    [uniqueStations, theme]
+  const flatChartsData = chartsData.flat();
+  const transformData = useMemo(
+    () => (data: typeof flatChartsData) => {
+      const result = [];
+      for (let i = 0; i < data.length; i++) {
+        const entry = data[i];
+        const station = entry.station;
+        const name = entry.name;
+        const BCI = +entry.BCI;
+        const index = result.findIndex((el) => el.station === station);
+        if (index === -1) {
+          result.push({
+            station,
+            [name]: BCI,
+            originalName: entry.originalName,
+          });
+        } else {
+          result[index][name] = BCI;
+        }
+      }
+      return result.sort((a, b) => a.station - b.station);
+    },
+    []
   );
   return (
     <Card className="mt-4 pt-6" key={"BDI"}>
@@ -79,9 +75,7 @@ const ChartBCI = ({ chartsData }: ChartData) => {
             <CardTitle>Podłoże</CardTitle>
             <CardDescription>BCI</CardDescription>
           </CardHeader>
-          <CardDescription className="text-slate-950">
-            Referencja
-          </CardDescription>
+          <CardDescription className="text-slate-950">Legenda</CardDescription>
 
           <ul>
             <li className="flex gap-2 items-center my-2 text-xs">
@@ -105,76 +99,55 @@ const ChartBCI = ({ chartsData }: ChartData) => {
               <p> {">"} 90 konieczny remont/przebudowa</p>
             </li>
           </ul>
-
-          <Button
-            onClick={handleClick}
-            variant={showReference ? "secondary" : "default"}
-            className="my-2"
-          >
-            {showReference ? "Ukryj Referencje" : "Pokaż Referencje"}
-          </Button>
         </div>
+
         <ResponsiveContainer width={"100%"} height={700}>
-          <LineChart data={chartsData}>
+          <ScatterChart data={transformData(flatChartsData)}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="station" />
+            <XAxis dataKey={"station"} type="category" />
             <YAxis
               type="number"
               domain={[0, 300]}
               ticks={[0, 50, 90, 120, 150, 180, 240, 300]}
             />
+
             <Tooltip />
             <Legend
-              formatter={(value, entry, index) => {
-                const firstPartText = value.substring(0, 7);
-                const secondPartText = value.substring(8);
-
+              payload={uniqueStations.map((data, i) => ({
+                value: data,
+                type: getShape(i),
+                id: data,
+                color: theme === "dark" ? "#fff" : "#000",
+              }))}
+              formatter={(value, entry) => {
                 return (
-                  <div className="mx-1">
-                    <p className="text-black">{firstPartText}</p>
-                    <span className="text-black">{secondPartText}</span>
+                  <div className="flex flex-col mx-2 text-sm">
+                    <span>{value}</span>
+                    <span>
+                      {
+                        flatChartsData.find((el) => el.name === entry.value)
+                          ?.originalName
+                      }
+                    </span>
                   </div>
                 );
               }}
             />
-            {showReference ? (
-              <>
-                <ReferenceArea
-                  y1={0}
-                  y2={45}
-                  fill="#00ff00"
-                  fillOpacity={0.5}
+            {CustomReferenceArea()}
+            {uniqueStations.map((data, i) => {
+              return (
+                <Scatter
+                  key={i}
+                  dataKey={data}
+                  name={"BCI"}
+                  shape={getShape(i)}
+                  stroke="#000000"
+                  fill={theme === "dark" ? "#fff" : "gray"}
                 />
-                <ReferenceArea
-                  y1={45}
-                  y2={60}
-                  fill="#006600"
-                  fillOpacity={0.5}
-                />
-                <ReferenceArea
-                  y1={60}
-                  y2={75}
-                  fill="#ff9900"
-                  fillOpacity={0.5}
-                />
-                <ReferenceArea
-                  y1={75}
-                  y2={90}
-                  fill="#cc3300"
-                  fillOpacity={0.5}
-                />
-                <ReferenceArea
-                  y1={90}
-                  y2={300}
-                  fill="#ff0000"
-                  fillOpacity={0.5}
-                />
-              </>
-            ) : null}
-            {showReference ? LineChartWithoutDot : LineChartWithDot}
-
-            <Brush dataKey="station" stroke="black" />
-          </LineChart>
+              );
+            })}
+            <Brush />
+          </ScatterChart>
         </ResponsiveContainer>
       </CardContent>
     </Card>

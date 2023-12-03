@@ -10,6 +10,7 @@ export interface Sessions {
     min: number;
     max: number;
   };
+  comments: string;
   geophoneX: Array<{ name: `X${number}`; value: number }>;
   radius: number;
   stations: Stations[];
@@ -42,9 +43,11 @@ export interface DataAfterCalculation {
   userInput: {
     type: "asc" | "desc";
     roadNumber: string;
+    roadCategory: string;
     roadwayNumber: string;
     laneNumber: string;
     dob: Date;
+    comments: string;
   };
   data: Params;
   file: {
@@ -52,14 +55,6 @@ export interface DataAfterCalculation {
     size: number;
   };
 }
-
-// export type DataForVisualisation = Pick<Params, "id"> & {
-//   sessions: Pick<Sessions, "length" | "stationMinMax"> & {
-//     stations: (Pick<Stations, "stationID" | "GPS"> & {
-//       indicators: Pick<Drops, "BDI" | "BCI" | "SCI">;
-//     })[];
-//   };
-// };
 
 export interface DataForVisualisation {
   id: `${string}-${string}-${string}-${string}-${string}`;

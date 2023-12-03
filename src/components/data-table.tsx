@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown } from "lucide-react";
-import { memo, useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useFilteredRow } from "@/lib/store-zustand";
 
@@ -101,6 +101,9 @@ const DataTable = <TData, TValue>({
                   case "roadwayNumber":
                     nameOfCol = "Nr jezdni";
                     break;
+                  case "roadCategory":
+                    nameOfCol = "Kategoria drogi";
+                    break;
                   case "laneNumber":
                     nameOfCol = "Nr pasa";
                     break;
@@ -112,6 +115,9 @@ const DataTable = <TData, TValue>({
                     break;
                   case "name":
                     nameOfCol = "Nazwa";
+                    break;
+                  case "sourceName":
+                    nameOfCol = "Nazwa pliku źródłowego";
                     break;
                 }
                 return (
@@ -137,7 +143,10 @@ const DataTable = <TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={`${header.index === 0 ? "pr-0" : "px-1"}`}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(

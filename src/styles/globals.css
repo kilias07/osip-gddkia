@@ -82,8 +82,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-#yaxis-12 {
-  background-color: blueviolet !important;
-  fill: blueviolet !important;
-}

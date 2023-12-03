@@ -1,4 +1,3 @@
-"use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import z from "zod";
 import { useForm } from "react-hook-form";
@@ -28,7 +27,7 @@ export const formSchema = z.object({
   file: z.any().refine((files) => files?.length === 1, "Plik jest wymagany"),
 });
 
-const UploadFormTest = () => {
+const UploadForm = () => {
   const [transformedData, setTransformedData] =
     useState<TransformedData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -64,6 +63,7 @@ const UploadFormTest = () => {
       method: "POST",
       body: data,
     });
+    setTransformedData(null);
     if (res.ok) {
       setTransformedData(await res.json());
       setLoading(false);
@@ -76,7 +76,7 @@ const UploadFormTest = () => {
   }
 
   return (
-    <div className="max-w-screen-xl">
+    <div className="">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -95,10 +95,6 @@ const UploadFormTest = () => {
                     {...form.register("file")}
                     defaultValue={field.value}
                     multiple={false}
-                    // onChange={(e) => {
-                    //   const file = e.target.files![0];
-                    //   file && setFileData(file);
-                    // }}
                     disabled={form.formState.isSubmitting}
                     placeholder="Wybierz plik"
                     id="fileInput"
@@ -136,7 +132,7 @@ const UploadFormTest = () => {
         " "
       )}
 
-      {transformedData && (
+      {transformedData?.message && (
         <FormFileData
           transformedData={transformedData.message}
           fileData={fileData}
@@ -147,4 +143,4 @@ const UploadFormTest = () => {
   );
 };
 
-export default UploadFormTest;
+export default UploadForm;

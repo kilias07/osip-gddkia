@@ -1,4 +1,4 @@
-import { DataAfterCalculation } from "@/types/types";
+import { DataAfterCalculation, Drops, Stations } from "@/types/types";
 import { OnChangeFn, RowSelectionState } from "@tanstack/react-table";
 import { UUID } from "crypto";
 import { create } from "zustand";
@@ -91,18 +91,21 @@ export const useShowWisualization = create<{
   setShowChart: (showChart) => set({ showChart }),
 }));
 
-export interface ChartData {
-  chartsData:
-    | {
-        [x: string]: string | number;
-        name: string;
-        station: number;
-      }[]
-    | [];
-}
+export type ChartData = Array<
+  Pick<Stations, "GPS"> & {
+    station: number;
+    SCI: number;
+    BDI: number;
+    BCI: number;
+    originalName: string;
+    name: string;
+    date: Date;
+  }
+>;
+
 export const useChartsData = create<{
-  chartsData: ChartData["chartsData"];
-  setChartsData: (chartsData: ChartData["chartsData"]) => void;
+  chartsData: ChartData[];
+  setChartsData: (chartsData: ChartData[]) => void;
 }>((set) => ({
   chartsData: [],
   setChartsData: (chartsData) => set({ chartsData }),

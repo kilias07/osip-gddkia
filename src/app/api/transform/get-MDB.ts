@@ -51,6 +51,7 @@ export const getMDBData = async (data: IncomingData) => {
         min: Number((sessions.StationMin as number)?.toFixed(2)),
         max: Number((sessions.StationMax as number)?.toFixed(2)),
       },
+      comments: "",
       geophoneX,
       radius: Number(sessions.Radius),
       stations: orderedStations,

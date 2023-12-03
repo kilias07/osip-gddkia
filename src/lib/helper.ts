@@ -18,9 +18,9 @@ const avgOffDropsIndicator = (stationDrops: Stations["drops"]) => {
   const length = stationDrops.length;
 
   return {
-    BDI: sum.BDI / length,
-    SCI: sum.SCI / length,
-    BCI: sum.BCI / length,
+    BDI: +(sum.BDI / length).toFixed(2),
+    SCI: +(sum.SCI / length).toFixed(2),
+    BCI: +(sum.BCI / length).toFixed(2),
   };
 };
 

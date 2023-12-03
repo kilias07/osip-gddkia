@@ -5,6 +5,7 @@ import {
   BCIIndicator,
   BDIIndicator,
   SCIIndicator,
+  getComments,
   getFWDDate,
   getGeophoneData,
 } from "./utils";
@@ -13,14 +14,20 @@ import { orderStations } from "./utils";
 export const getFWDData = async (data: IncomingData) => {
   const bytes = await data.file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const fileData = buffer.toString();
 
-  if (fileData.slice(0, 3) === "R32") {
+  if (buffer.toString().slice(0, 3) === "R32") {
+    const fileData = buffer.toString();
     const params = {
       id: randomUUID(),
       sessions: getSession(fileData),
     };
     return params;
+  } else if (
+    buffer.toString("utf-16le", 0, 100).slice(1, 6).toLowerCase() === "ikuab"
+  ) {
+    throw new Error(
+      "Ten plik FWD - IKUAB nie jest obsługiwany, wsparcie wkrótce"
+    );
   } else {
     throw new Error("Ten plik FWD nie jest obsługiwany");
   }
@@ -45,7 +52,7 @@ function getSession(fileData: string): Sessions {
 
   const orderedStations = orderStations(stations);
 
-  return <Sessions>{
+  return {
     date: date.toString(),
     length: (Math.abs(+endKM) - Math.abs(+startKMTest)).toFixed(2),
     stationMinMax: {
@@ -53,6 +60,7 @@ function getSession(fileData: string): Sessions {
       max: +Number(endKM).toFixed(2),
     },
     geophoneX,
+    comments: getComments(lines),
     radius,
     stations: orderedStations,
   };
@@ -68,6 +76,8 @@ function getStations(
 
   const startIndexOfStations = <Array<number>>[];
 
+  if (stationsRawArray.length === 0) throw new Error("Plik nie posiada stacji");
+
   for (let i = 0; i < stationsRawArray.length; i++) {
     if (stationsRawArray[i].includes("S")) {
       startIndexOfStations.push(i);
@@ -79,6 +89,7 @@ function getStations(
   let asphalftTemp = 0;
   let surfaceTemp = 0;
   let airTemp = 0;
+  let lengthOfDrops = 0;
 
   for (let i = 0; i < stationsRawArray.length; i++) {
     if (startIndexOfStations.includes(i)) {
@@ -92,13 +103,12 @@ function getStations(
         long = +stationsRawArray[i - 1].split(" ")[1];
         lat = +stationsRawArray[i - 1].split(" ")[3];
       }
-
       const minutes = Number(stationLine[stationLine.length - 1].slice(3));
       const hours = Number(stationLine[stationLine.length - 1].slice(1, 3));
 
-      asphalftTemp = Number(stationLine[2]);
-      surfaceTemp = +stationLine[3];
-      airTemp = +stationLine[4];
+      asphalftTemp = Number(stationsRawArray[i].substring(14, 18));
+      surfaceTemp = Number(stationsRawArray[i].substring(21, 23));
+      airTemp = Number(stationsRawArray[i].substring(24, 26));
       stations.push({
         stationID: id++,
         station: +stationLine[1].match(/[\d.]+/g)?.[0]!,
@@ -114,9 +124,10 @@ function getStations(
       });
     } else {
       const rowDrops = stationsRawArray[i].split(" ").filter((x) => x !== "");
-
       //we skip the gps line that will always be 3 elements long
       if (rowDrops.length === 3) continue;
+      //we skip hte comment station line
+      if (rowDrops[0].includes("'")) continue;
       const stress = +rowDrops.shift()!;
 
       const getDrops = rowDrops.map((el, index) => {
@@ -143,10 +154,3 @@ function getStations(
 
   return stations;
 }
-
-// More precis with those functions:
-// const date = lines[0]
-//   .split(" ")
-//   .filter((x) => x !== "")[1]
-//   .substring(0, 8);
-// const [, startKM, endKM] = lines[7].split(" ").filter((x) => x !== "");

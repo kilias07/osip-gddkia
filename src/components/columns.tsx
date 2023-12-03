@@ -18,6 +18,13 @@ import {
 import { useData, useFilteredRow } from "@/lib/store-zustand";
 import { format } from "date-fns";
 
+import {
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+  Tooltip,
+} from "./ui/tooltip";
+
 export const columns: ColumnDef<DataAfterCalculation>[] = [
   {
     id: "select",
@@ -44,9 +51,11 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
       return (
         <Button
           variant="ghost"
+          className="px-1 flex flex-col w-[7rem]"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Nr drogi
+          <span>Nr drogi/</span>
+          <span>Nazwa obiektu</span>
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -54,6 +63,24 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
     id: "roadNumber",
     cell: ({ row }) => (
       <div className="text-center">{row.getValue("roadNumber")}</div>
+    ),
+  },
+  {
+    accessorKey: "userInput.roadCategory",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Kategoria drogi
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    id: "roadCategory",
+    cell: ({ row }) => (
+      <div className="text-center">{row.getValue("roadCategory")}</div>
     ),
   },
   {
@@ -97,9 +124,17 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
     header: "Data",
     id: "dob",
     cell: ({ row }) => {
-      const dateString = new Date(row.getValue("dob")).toLocaleDateString();
+      const dateString = format(new Date(row.getValue("dob")), "yyyy.MM.dd");
       return <div className="lowercase">{dateString}</div>;
     },
+  },
+  {
+    accessorKey: "sourceName",
+    header: "Nazwa pliku źródłowego",
+    id: "sourceName",
+    cell: ({ row }) => (
+      <div className="lowercase max-w-[10rem]">{row.original.file.name}</div>
+    ),
   },
   {
     accessorKey: "name",
@@ -119,6 +154,7 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
 
       const copyData = {
         roadNumber: roadTesting.userInput.roadNumber,
+        category: roadTesting.userInput.roadCategory,
         roadwayNumber: roadTesting.userInput.roadwayNumber,
         laneNumber: roadTesting.userInput.laneNumber,
         type: roadTesting.userInput.type === "asc" ? "r" : "m",
@@ -126,7 +162,20 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
       };
 
       const data = Object.values(copyData).join("_") + "." + ext?.toLowerCase();
-      return <div className="lowercase">{data}</div>;
+      return (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="lowercase cursor-default">
+              {data}
+            </TooltipTrigger>
+            <TooltipContent>
+              <span>
+                nr drogi_kat drogi_nr jezdni_nr pasa_kilometraż_data_godzina
+              </span>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      );
     },
   },
   {
@@ -145,6 +194,7 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
       const ext = roadOriginalName.split(".").pop();
       const dataForName = {
         roadNumber: roadTesting.userInput.roadNumber,
+        category: roadTesting.userInput.roadCategory,
         roadwayNumber: roadTesting.userInput.roadwayNumber,
         laneNumber: roadTesting.userInput.laneNumber,
         type: roadTesting.userInput.type === "asc" ? "r" : "m",
