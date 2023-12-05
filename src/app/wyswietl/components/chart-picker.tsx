@@ -11,7 +11,7 @@ const ChartPicker = ({ picked, setPicked }: ChartPickerProps) => {
   return (
     <div className="rounded-md border p-4">
       <h1 className="text-base mb-2 font-medium leading-none">
-        Wybierz warstwy
+        Wybierz zawartość wykresu
       </h1>
       <div className="flex gap-4 items-center">
         <div className="items-top flex space-x-2">

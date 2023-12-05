@@ -89,7 +89,6 @@ function getStations(
   let asphalftTemp = 0;
   let surfaceTemp = 0;
   let airTemp = 0;
-  let lengthOfDrops = 0;
 
   for (let i = 0; i < stationsRawArray.length; i++) {
     if (startIndexOfStations.includes(i)) {
@@ -128,13 +127,24 @@ function getStations(
       if (rowDrops.length === 3) continue;
       //we skip hte comment station line
       if (rowDrops[0].includes("'")) continue;
-      const stress = +rowDrops.shift()!;
 
-      const getDrops = rowDrops.map((el, index) => {
-        return {
-          [`D${index + 1}`]: +el,
-        };
-      });
+      const rawRowStation = stationsRawArray[i];
+      const stress = +rawRowStation.slice(0, 4);
+      const getDrops = [
+        { [`D${1}`]: +rawRowStation.slice(4, 8) },
+        { [`D${2}`]: +rawRowStation.slice(8, 12) },
+        { [`D${3}`]: +rawRowStation.slice(12, 16) },
+        { [`D${4}`]: +rawRowStation.slice(16, 20) },
+        { [`D${5}`]: +rawRowStation.slice(20, 24) },
+        { [`D${6}`]: +rawRowStation.slice(24, 28) },
+        { [`D${7}`]: +rawRowStation.slice(28, 32) },
+      ] as Array<{ [key: `D${number}`]: number }>;
+
+      // const getDrops = rowDrops.map((el, index) => {
+      //   return {
+      //     [`D${index + 1}`]: +el,
+      //   };
+      // });
 
       const foundDrop = stations.find((el) => el.stationID === id - 1);
       const force = +(stress * Math.PI * Math.pow(radius * 0.001, 2)).toFixed(

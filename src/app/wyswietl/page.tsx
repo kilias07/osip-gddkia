@@ -49,6 +49,7 @@ export default function ShowResults() {
       const ext = roadOriginalName.split(".").pop();
       const dataForName = {
         roadNumber: measure.userInput.roadNumber,
+        roadCategory: measure.userInput.roadCategory,
         roadwayNumber: measure.userInput.roadwayNumber,
         laneNumber: measure.userInput.laneNumber,
         type: measure.userInput.type === "asc" ? "r" : "m",
@@ -56,6 +57,7 @@ export default function ShowResults() {
       };
       return measure.data.sessions.stations.map((station) => {
         const name = Object.values(dataForName).join("_") + "." + ext;
+
         const { BCI, BDI, SCI } = avgOffDropsIndicator(station.drops);
         return {
           GPS: {
@@ -63,9 +65,10 @@ export default function ShowResults() {
             lat: station.GPS.lat,
           },
           station: station.station,
-          SCI,
-          BDI,
-          BCI,
+          roadCategory: measure.userInput.roadCategory,
+          SCI: Math.round(SCI),
+          BDI: Math.round(BDI),
+          BCI: Math.round(BCI),
           date: measure.userInput.dob,
           name,
           originalName: measure.file.name,

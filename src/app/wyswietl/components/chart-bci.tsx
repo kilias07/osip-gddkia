@@ -1,10 +1,8 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+"use client";
+
+import dynamic from "next/dynamic";
+const Map = dynamic(() => import("./map"), { ssr: false });
+import { Card, CardContent } from "@/components/ui/card";
 
 import {
   Brush,
@@ -23,14 +21,15 @@ import { useMemo } from "react";
 import { useTheme } from "next-themes";
 import { useChartsData } from "@/lib/store-zustand";
 import { getShape } from "./chart-functions";
+import { LegendBCI } from "./legend";
 
 const CustomReferenceArea = () => (
   <>
-    <ReferenceArea y1={0} y2={45} fill="#00ff00" fillOpacity={0.5} />
-    <ReferenceArea y1={45} y2={60} fill="#006600" fillOpacity={0.5} />
-    <ReferenceArea y1={60} y2={75} fill="#ff9900" fillOpacity={0.5} />
-    <ReferenceArea y1={75} y2={90} fill="#cc3300" fillOpacity={0.5} />
-    <ReferenceArea y1={90} y2={300} fill="#ff0000" fillOpacity={0.5} />
+    <ReferenceArea y1={0} y2={45} fill="#00ff00" fillOpacity={0.7} />
+    <ReferenceArea y1={45} y2={60} fill="#006600" fillOpacity={0.7} />
+    <ReferenceArea y1={60} y2={75} fill="#ff9900" fillOpacity={0.7} />
+    <ReferenceArea y1={75} y2={90} fill="#cc3300" fillOpacity={0.7} />
+    <ReferenceArea y1={90} y2={200} fill="#ff0000" fillOpacity={0.8} />
   </>
 );
 
@@ -40,7 +39,6 @@ const ChartBCI = () => {
     () => [...new Set(chartsData.flat().map((data) => data.name))],
     [chartsData]
   );
-
   const { theme } = useTheme();
 
   const flatChartsData = chartsData.flat();
@@ -52,12 +50,14 @@ const ChartBCI = () => {
         const station = entry.station;
         const name = entry.name;
         const BCI = +entry.BCI;
+
         const index = result.findIndex((el) => el.station === station);
         if (index === -1) {
           result.push({
             station,
             [name]: BCI,
             originalName: entry.originalName,
+            gps: entry.GPS,
           });
         } else {
           result[index][name] = BCI;
@@ -67,51 +67,26 @@ const ChartBCI = () => {
     },
     []
   );
+
   return (
-    <Card className="mt-4 pt-6" key={"BDI"}>
+    <Card className="mt-4 pt-6 w-full">
       <CardContent className="flex flex-col md:flex-row">
-        <div className="w-full md:w-64">
-          <CardHeader className="pl-1">
-            <CardTitle>Podłoże</CardTitle>
-            <CardDescription>BCI</CardDescription>
-          </CardHeader>
-          <CardDescription className="text-slate-950">Legenda</CardDescription>
-
-          <ul>
-            <li className="flex gap-2 items-center my-2 text-xs">
-              <span className="bg-[#00ff00] w-5 h-5 rounded-full inline-block" />
-              <p>0 - 45 dobry stan techniczny</p>
-            </li>
-            <li className="flex gap-2 items-center my-2 text-xs">
-              <span className="bg-[#006600] w-5 h-5 rounded-full inline-block" />
-              <p>46 - 60 stan techniczny zadowalający</p>
-            </li>
-            <li className="flex gap-2 items-center my-2 text-xs">
-              <span className="bg-[#ff9900] w-5 h-5 rounded-full inline-block" />
-              <p>61 - 75 stan ostrzegawczy</p>
-            </li>
-            <li className="flex gap-2 items-center my-2 text-xs">
-              <span className="bg-[#cc3300] w-5 h-5 rounded-full inline-block" />
-              <p>76 - 90 stan zły</p>
-            </li>
-            <li className="flex gap-2 items-center my-2 text-xs">
-              <span className="bg-[#ff0000] w-5 h-5 rounded-full inline-block" />
-              <p> {">"} 90 konieczny remont/przebudowa</p>
-            </li>
-          </ul>
-        </div>
-
-        <ResponsiveContainer width={"100%"} height={700}>
+        <LegendBCI />
+        <ResponsiveContainer className="grow" width={"100%"} height={700}>
           <ScatterChart data={transformData(flatChartsData)}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey={"station"} type="category" />
             <YAxis
               type="number"
-              domain={[0, 300]}
-              ticks={[0, 50, 90, 120, 150, 180, 240, 300]}
+              domain={[0, 200]}
+              ticks={[0, 45, 60, 75, 150, 90, 200]}
             />
 
-            <Tooltip />
+            <Tooltip
+              labelFormatter={() => {
+                return <></>;
+              }}
+            />
             <Legend
               payload={uniqueStations.map((data, i) => ({
                 value: data,
@@ -137,6 +112,7 @@ const ChartBCI = () => {
             {uniqueStations.map((data, i) => {
               return (
                 <Scatter
+                  isAnimationActive={false}
                   key={i}
                   dataKey={data}
                   name={"BCI"}
@@ -149,6 +125,7 @@ const ChartBCI = () => {
             <Brush />
           </ScatterChart>
         </ResponsiveContainer>
+        <Map data={transformData(flatChartsData)} indicator={"BCI"} />
       </CardContent>
     </Card>
   );

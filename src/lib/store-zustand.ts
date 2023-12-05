@@ -100,6 +100,7 @@ export type ChartData = Array<
     originalName: string;
     name: string;
     date: Date;
+    roadCategory: string;
   }
 >;
 

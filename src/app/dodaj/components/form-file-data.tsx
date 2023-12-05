@@ -51,7 +51,6 @@ const FormFileData = ({
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
     if (!values) return;
     const response: DataAfterCalculation = {
       userInput: { ...values },
@@ -94,6 +93,7 @@ const FormFileData = ({
                     placeholder="np. 32"
                     value={field.value || ""}
                     onChange={field.onChange}
+                    type="number"
                   />
                 </FormControl>
                 <FormDescription>Wpisz numer drogi</FormDescription>
@@ -107,16 +107,18 @@ const FormFileData = ({
             name="roadCategory"
             render={({ field }) => (
               <FormItem className="w-full sm:w-fit">
-                <FormLabel>Kategoria drogi</FormLabel>
+                <FormLabel>Kategoria ruchu</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="np. KR1"
-                    type="text"
+                    placeholder="np. 1"
                     value={field.value || ""}
                     onChange={field.onChange}
+                    type="number"
+                    min={0}
+                    max={7}
                   />
                 </FormControl>
-                <FormDescription>Wpisz numer drogi</FormDescription>
+                <FormDescription>Wpisz kategorię ruchu</FormDescription>
                 <FormMessage />
               </FormItem>
             )}

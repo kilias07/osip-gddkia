@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import { useCallback } from "react";
 import format from "date-fns/format";
 import avgOffDropsIndicator from "@/lib/helper";
-import { DataForVisualisation } from "@/types/types";
 import Link from "next/link";
 
 const AddResults = () => {
@@ -33,6 +32,7 @@ const AddResults = () => {
       const ext = roadOriginalName.split(".").pop();
       const dataForName = {
         roadNumber: measure.userInput.roadNumber,
+        roadCategory: measure.userInput.roadCategory,
         roadwayNumber: measure.userInput.roadwayNumber,
         laneNumber: measure.userInput.laneNumber,
         type: measure.userInput.type === "asc" ? "r" : "m",
@@ -46,6 +46,7 @@ const AddResults = () => {
             long: station.GPS.long,
             lat: station.GPS.lat,
           },
+          roadCategory: measure.userInput.roadCategory,
           station: station.station,
           SCI,
           BDI,

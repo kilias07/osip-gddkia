@@ -73,7 +73,7 @@ export const columns: ColumnDef<DataAfterCalculation>[] = [
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Kategoria drogi
+          Kategoria ruchu
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );

@@ -19,6 +19,7 @@ export const getMDBData = async (data: IncomingData) => {
   const reader = new MDBReader(buffer);
   let geophoneX = <Sessions["geophoneX"]>[];
   let asphalftTemp = <null | number>null;
+  let surfaceTemp = <null | number>null;
 
   function getSessions(reader: MDBReader): Sessions {
     const sessions = reader.getTable("Sessions").getData()[0];
@@ -64,6 +65,7 @@ export const getMDBData = async (data: IncomingData) => {
       .getData()
       .map((station) => {
         asphalftTemp = +(station.AsphaltTemperature as number)?.toFixed(3);
+        surfaceTemp = +(station.SurfaceTemperature as number)?.toFixed(3);
         return {
           stationID: station.StationID,
           station: +(station.Station as number)?.toFixed(3),
@@ -108,14 +110,15 @@ export const getMDBData = async (data: IncomingData) => {
         const stress = +(drop.Stress as number)?.toFixed(2);
 
         const force = +(drop.Force as number)?.toFixed(2);
+        const checkedAsphaltTemp = asphalftTemp ? asphalftTemp : surfaceTemp;
 
         return {
           force,
           stress,
           drops,
-          SCI: SCIIndicator(geophoneX, force, asphalftTemp!, drops),
-          BDI: BDIIndicator(geophoneX, force, asphalftTemp!, drops),
-          BCI: BCIIndicator(geophoneX, force, asphalftTemp!, drops),
+          SCI: SCIIndicator(geophoneX, force, checkedAsphaltTemp!, drops),
+          BDI: BDIIndicator(geophoneX, force, checkedAsphaltTemp!, drops),
+          BCI: BCIIndicator(geophoneX, force, checkedAsphaltTemp!, drops),
         };
       });
     return data;

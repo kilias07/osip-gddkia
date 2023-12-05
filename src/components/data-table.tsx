@@ -102,7 +102,7 @@ const DataTable = <TData, TValue>({
                     nameOfCol = "Nr jezdni";
                     break;
                   case "roadCategory":
-                    nameOfCol = "Kategoria drogi";
+                    nameOfCol = "Kategoria ruchu";
                     break;
                   case "laneNumber":
                     nameOfCol = "Nr pasa";

@@ -103,7 +103,7 @@ export const SCIIndicator = (
   ];
   const u30 = (50 / force) * Dx30Value * (1 + 0.02 * (20 - asphalftTemp));
   const u0 = (50 / force) * Dx0Value * (1 + 0.02 * (20 - asphalftTemp));
-  const sci = +(u0 - u30).toFixed(2);
+  const sci = Math.round(u0 - u30);
   if (sci > 300) return 300;
   return sci;
 };
@@ -124,7 +124,7 @@ export const BDIIndicator = (
   ];
   const u60 = (50 / force) * Dx60Value * (1 + 0.02 * (20 - asphalftTemp));
   const u30 = (50 / force) * Dx0Value * (1 + 0.02 * (20 - asphalftTemp));
-  const bdi = +(u30 - u60).toFixed(2);
+  const bdi = Math.round(u30 - u60);
   if (bdi > 300) return 300;
   return bdi;
 };
@@ -145,8 +145,8 @@ export const BCIIndicator = (
   ];
   const u90 = (50 / force) * Dx90Value * (1 + 0.02 * (20 - asphalftTemp));
   const u60 = (50 / force) * Dx0Value * (1 + 0.02 * (20 - asphalftTemp));
-  const bci = +(u60 - u90).toFixed(2);
-  if (bci > 300) return 300;
+  const bci = Math.round(u60 - u90);
+  if (bci > 200) return 200;
   return bci;
 };
 
