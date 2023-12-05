@@ -64,6 +64,7 @@ const ChartBDI = () => {
     },
     []
   );
+  const gps = chartsData[0][0].GPS;
 
   return (
     <Card className="mt-4 pt-6 w-full">
@@ -122,7 +123,9 @@ const ChartBDI = () => {
             <Brush />
           </ScatterChart>
         </ResponsiveContainer>
-        <Map data={transformData(flatChartsData)} indicator={"BDI"} />
+        {gps.lat ? (
+          <Map data={transformData(flatChartsData)} indicator={"BCI"} />
+        ) : null}
       </CardContent>
     </Card>
   );

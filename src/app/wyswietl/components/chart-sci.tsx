@@ -128,6 +128,8 @@ const ChartSCI = () => {
     []
   );
   const roadCategory = +chartsData[0][0].roadCategory;
+  const gps = chartsData[0][0].GPS;
+
   return (
     <Card className="mt-4 pt-6">
       <CardContent className="flex flex-col md:flex-row">
@@ -185,7 +187,9 @@ const ChartSCI = () => {
             <Brush />
           </ScatterChart>
         </ResponsiveContainer>
-        <Map data={transformData(flatChartsData)} indicator={"BCI"} />
+        {gps.lat ? (
+          <Map data={transformData(flatChartsData)} indicator={"BCI"} />
+        ) : null}
       </CardContent>
     </Card>
   );
