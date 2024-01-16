@@ -1,6 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
+import {zodResolver} from "@hookform/resolvers/zod";
 import z from "zod";
-import { useForm } from "react-hook-form";
+import {useForm} from "react-hook-form";
 import {
   Form,
   FormControl,
@@ -10,13 +10,13 @@ import {
   FormLabel,
   FormMessage,
 } from "../../../components/ui/form";
-import { Input } from "../../../components/ui/input";
-import { Button } from "../../../components/ui/button";
+import {Input} from "../../../components/ui/input";
+import {Button} from "../../../components/ui/button";
 
-import { toast } from "sonner";
-import { useState } from "react";
+import {toast} from "sonner";
+import {useState} from "react";
 import FormFileData from "./form-file-data";
-import { Params } from "@/types/types";
+import {Params} from "@/types/types";
 
 export type TransformedData = {
   success: boolean;
@@ -34,6 +34,7 @@ const UploadForm = () => {
   const [fileData, setFileData] = useState<File | null>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
+    // @ts-ignore
     resolver: zodResolver(formSchema),
     defaultValues: {
       file: null,
@@ -50,7 +51,7 @@ const UploadForm = () => {
     if (!values) return;
 
     const {
-      file: { 0: file },
+      file: {0: file},
     } = values;
 
     setFileData(file);
@@ -69,7 +70,7 @@ const UploadForm = () => {
       setLoading(false);
     } else {
       setLoading(false);
-      const { error } = await res.json();
+      const {error} = await res.json();
       toast.error(error);
       reset();
     }
@@ -85,7 +86,7 @@ const UploadForm = () => {
           <FormField
             control={form.control}
             name="file"
-            render={({ field }) => (
+            render={({field}) => (
               <FormItem className="grow">
                 <FormLabel htmlFor="fileInput">Prześlij plik</FormLabel>
                 <FormControl>
@@ -104,7 +105,7 @@ const UploadForm = () => {
                 <FormDescription>
                   Prześlij plik z wynikami w formacie .mdb lub .fwd
                 </FormDescription>
-                <FormMessage />
+                <FormMessage/>
               </FormItem>
             )}
           />
@@ -124,7 +125,8 @@ const UploadForm = () => {
           className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
           role="status"
         >
-          <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+          <span
+            className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
             Ładuję...
           </span>
         </div>
