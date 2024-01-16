@@ -1,15 +1,15 @@
-import { Sessions, Stations } from "@/types/types";
-import { IncomingData } from "./route";
-import { randomUUID } from "crypto";
+import {Sessions, Stations} from "@/types/types";
+import {IncomingData} from "./route";
+import {randomUUID} from "crypto";
 import {
   BCIIndicator,
   BDIIndicator,
-  SCIIndicator,
   getComments,
   getFWDDate,
   getGeophoneData,
+  orderStations,
+  SCIIndicator,
 } from "./utils";
-import { orderStations } from "./utils";
 
 export const getFWDData = async (data: IncomingData) => {
   const bytes = await data.file.arrayBuffer();
@@ -17,11 +17,10 @@ export const getFWDData = async (data: IncomingData) => {
 
   if (buffer.toString().slice(0, 3) === "R32") {
     const fileData = buffer.toString();
-    const params = {
+    return {
       id: randomUUID(),
       sessions: getSession(fileData),
     };
-    return params;
   } else if (
     buffer.toString("utf-16le", 0, 100).slice(1, 6).toLowerCase() === "ikuab"
   ) {
@@ -42,7 +41,7 @@ function getSession(fileData: string): Sessions {
 
   // Find EOF and remove 2 characters from it to get the end of file and prevent empty spaces
   const endOfFile = fileData.lastIndexOf("EOF") - 2;
-  const { geophoneX, radius } = getGeophoneData(lines[2]);
+  const {geophoneX, radius} = getGeophoneData(lines[2]);
 
   const dateString = lines[0].substring(11, 19);
   const date = getFWDDate(dateString);
@@ -131,20 +130,14 @@ function getStations(
       const rawRowStation = stationsRawArray[i];
       const stress = +rawRowStation.slice(0, 4);
       const getDrops = [
-        { [`D${1}`]: +rawRowStation.slice(4, 8) },
-        { [`D${2}`]: +rawRowStation.slice(8, 12) },
-        { [`D${3}`]: +rawRowStation.slice(12, 16) },
-        { [`D${4}`]: +rawRowStation.slice(16, 20) },
-        { [`D${5}`]: +rawRowStation.slice(20, 24) },
-        { [`D${6}`]: +rawRowStation.slice(24, 28) },
-        { [`D${7}`]: +rawRowStation.slice(28, 32) },
+        {[`D${1}`]: +rawRowStation.slice(4, 8)},
+        {[`D${2}`]: +rawRowStation.slice(8, 12)},
+        {[`D${3}`]: +rawRowStation.slice(12, 16)},
+        {[`D${4}`]: +rawRowStation.slice(16, 20)},
+        {[`D${5}`]: +rawRowStation.slice(20, 24)},
+        {[`D${6}`]: +rawRowStation.slice(24, 28)},
+        {[`D${7}`]: +rawRowStation.slice(28, 32)},
       ] as Array<{ [key: `D${number}`]: number }>;
-
-      // const getDrops = rowDrops.map((el, index) => {
-      //   return {
-      //     [`D${index + 1}`]: +el,
-      //   };
-      // });
 
       const foundDrop = stations.find((el) => el.stationID === id - 1);
       const force = +(stress * Math.PI * Math.pow(radius * 0.001, 2)).toFixed(

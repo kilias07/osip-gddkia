@@ -301,25 +301,3 @@ const FormFileData = ({
 };
 
 export default FormFileData;
-
-{
-  /* <FormField
-control={form.control}
-name="placeName"
-render={({ field }) => (
-  <FormItem className="w-full sm:w-fit">
-    <FormLabel>Nazwa obiektu</FormLabel>
-    <FormControl>
-      <Input
-        placeholder="np. terminal"
-        type="text"
-        value={field.value || ""}
-        onChange={field.onChange}
-      />
-    </FormControl>
-    <FormDescription>Wpisz nazwę obiektu</FormDescription>
-    <FormMessage />
-  </FormItem>
-)}
-/> */
-}

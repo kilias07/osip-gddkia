@@ -1,4 +1,4 @@
-import { Stations } from "@/types/types";
+import {Stations} from "@/types/types";
 
 const avgOffDropsIndicator = (stationDrops: Stations["drops"]) => {
   const sum = stationDrops.reduce(

@@ -1,14 +1,8 @@
-import { IncomingData } from "./route";
+import {IncomingData} from "./route";
 import MDBReader from "mdb-reader";
-import {
-  BCIIndicator,
-  BDIIndicator,
-  SCIIndicator,
-  getNonZeroValArr,
-  orderStations,
-} from "./utils";
-import { randomUUID } from "crypto";
-import { Drops, Sessions, Stations } from "@/types/types";
+import {BCIIndicator, BDIIndicator, getNonZeroValArr, orderStations, SCIIndicator,} from "./utils";
+import {randomUUID} from "crypto";
+import {Drops, Sessions, Stations} from "@/types/types";
 
 const X_PATTERN = /\bX([1-9]|\d{2})\b/;
 const D_PATTERN = /\bD([1-9]|\d{2})\b/;
@@ -18,7 +12,7 @@ export const getMDBData = async (data: IncomingData) => {
   const buffer = Buffer.from(bytes);
   const reader = new MDBReader(buffer);
   let geophoneX = <Sessions["geophoneX"]>[];
-  let asphalftTemp = <null | number>null;
+  let asphaltTemp = <null | number>null;
   let surfaceTemp = <null | number>null;
 
   function getSessions(reader: MDBReader): Sessions {
@@ -64,12 +58,12 @@ export const getMDBData = async (data: IncomingData) => {
       .getTable("Stations")
       .getData()
       .map((station) => {
-        asphalftTemp = +(station.AsphaltTemperature as number)?.toFixed(3);
+        asphaltTemp = +(station.AsphaltTemperature as number)?.toFixed(3);
         surfaceTemp = +(station.SurfaceTemperature as number)?.toFixed(3);
         return {
           stationID: station.StationID,
           station: +(station.Station as number)?.toFixed(3),
-          asphalftTemp,
+          asphalftTemp: asphaltTemp,
           surfaceTemp: +(station.SurfaceTemperature as number)?.toFixed(3),
           airTemp: +(station.AirTemperature as number)?.toFixed(3),
           time: station.Time,
@@ -110,7 +104,7 @@ export const getMDBData = async (data: IncomingData) => {
         const stress = +(drop.Stress as number)?.toFixed(2);
 
         const force = +(drop.Force as number)?.toFixed(2);
-        const checkedAsphaltTemp = asphalftTemp ? asphalftTemp : surfaceTemp;
+        const checkedAsphaltTemp = asphaltTemp ? asphaltTemp : surfaceTemp;
 
         return {
           force,
@@ -123,10 +117,9 @@ export const getMDBData = async (data: IncomingData) => {
       });
     return data;
   }
-  const params = {
+
+  return {
     id: randomUUID(),
     sessions: getSessions(reader),
   };
-
-  return params;
 };
